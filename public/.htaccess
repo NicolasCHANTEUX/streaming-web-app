@@ -1,12 +1,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    
-    # Redirect to public folder
-    RewriteCond %{REQUEST_URI} !^/public/
-    RewriteRule ^(.*)$ /public/$1 [L]
-    
-    # Handle Front Controller...
+
+    # Si le fichier ou dossier demandé n'existe pas physiquement...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
+
+    # ... on redirige tout vers index.php (le cœur de ton site)
     RewriteRule ^ index.php [L]
 </IfModule>
