@@ -1,0 +1,78 @@
+name: Deploy Music App
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    
+    steps:
+    - name: 🚚 Récupération du code
+      uses: actions/checkout@v3
+
+    # --- Build Frontend (Tailwind CSS) ---
+    - name: 🏗️ Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: 📦 Install NPM & Build Tailwind
+      run: |
+        rm -rf node_modules
+        npm install
+        # On rend le binaire exécutable au cas où
+        chmod +x node_modules/.bin/tailwindcss
+        npm run build
+
+    # --- Backup Sécurité ---
+    - name: 💾 Backup de la base de données
+      run: |
+        BACKUP_DIR="/var/backups/music_streaming"
+        sudo mkdir -p $BACKUP_DIR
+        sudo chmod 777 $BACKUP_DIR
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+        # Backup de la base 'music_streaming'
+        sudo mysqldump music_streaming > $BACKUP_DIR/db_backup_$TIMESTAMP.sql || echo "⚠️ Backup DB échoué (Non bloquant)"
+
+    # --- Copie des fichiers ---
+    - name: 📂 Copie des fichiers
+      run: |
+        # On exclut le dossier de musique du serveur pour ne pas l'écraser avec celui du git (vide)
+        # On exclut config.php s'il est spécifique au serveur, sinon on peut le laisser
+        sudo rsync -av --exclude='.git' --exclude='.env' --exclude='node_modules' --exclude='storage/music/*' ./ /var/www/music_streaming/
+
+    # --- Installation PHP ---
+    - name: 📦 Installation Composer
+      run: |
+        sudo chown -R $USER:$USER /var/www/music_streaming
+        
+        cd /var/www/music_streaming
+        # Installation des dépendances (getid3, etc.)
+        composer install --no-dev --optimize-autoloader --no-interaction
+
+    # --- Permissions ---
+    - name: 🔧 Configuration des permissions
+      run: |
+        cd /var/www/music_streaming
+        
+        # Création des dossiers critiques s'ils n'existent pas
+        sudo mkdir -p storage/music
+        sudo mkdir -p public/assets/images/covers
+        
+        # Attribution au serveur web (www-data)
+        sudo chown -R www-data:www-data storage
+        sudo chown -R www-data:www-data public/assets/images/covers
+        
+        # Permissions larges pour éviter les erreurs d'écriture (yt-dlp, covers)
+        sudo chmod -R 777 storage
+        sudo chmod -R 777 public/assets/images/covers
+
+    # --- Redémarrage ---
+    - name: 🔄 Redémarrage du serveur web
+      run: |
+        sudo systemctl reload apache2
+        sudo systemctl reload php8.3-fpm || echo "Pas de FPM à reload"
+
+    - name: ✅ Déploiement terminé
+      run: echo "🎉 Music App déployée !"
