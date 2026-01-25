@@ -62,6 +62,19 @@ class YoutubeDownloader
             return ['success' => false, 'error' => 'Video ID is required'];
         }
 
+        // Vérifier l'espace disque disponible (minimum 100 MB)
+        $freeSpace = disk_free_space($this->musicPath);
+        $minSpace = 100 * 1024 * 1024; // 100 MB
+        
+        if ($freeSpace === false || $freeSpace < $minSpace) {
+            $freeSpaceMB = $freeSpace !== false ? round($freeSpace / 1024 / 1024, 2) : 'unknown';
+            error_log("Insufficient disk space: {$freeSpaceMB} MB available");
+            return [
+                'success' => false, 
+                'error' => "Espace disque insuffisant ({$freeSpaceMB} MB disponibles, minimum 100 MB requis)"
+            ];
+        }
+
         $url = "https://www.youtube.com/watch?v=" . escapeshellarg($videoId);
         
         // Output template

@@ -156,15 +156,38 @@ fetch('/api/playlists', {
 | **Covers** | 4 fichiers | ⭐⭐⭐ Critique - UX |
 | **MediaSession** | 1 fichier | ⭐⭐ Important - Mobile |
 | **CSRF** | 9 fichiers | ⭐⭐⭐ Critique - Sécurité |
+| **Timeout Protection** | 1 fichier | ⭐⭐ Important - Stabilité |
+| **Disk Space Check** | 1 fichier | ⭐⭐ Important - Fiabilité |
 
-**Total : 16 fichiers modifiés ou créés**
+**Total : 18 fichiers modifiés ou créés**
 
 ---
 
 ## 🔮 Points Restants pour V3 (Non Critiques)
 
-### 1. Système de Queue pour Téléchargements
-**Problème :** Les longs téléchargements peuvent timeout.
+### ~~1. Timeout PHP sur scan massif~~ ✅ RÉSOLU
+**Problème :** Scanner 500+ fichiers pouvait dépasser `max_execution_time` (30s).
+
+**Solution implémentée :**
+- Ajout de `set_time_limit(0)` dans `MusicController::scan()`
+- Le script peut maintenant tourner indéfiniment le temps du scan
+- Parfait pour les grandes bibliothèques musicales
+
+---
+
+### ~~2. Vérification espace disque~~ ✅ RÉSOLU
+**Problème :** Téléchargement YouTube sans vérifier l'espace disque disponible.
+
+**Solution implémentée :**
+- Vérification de `disk_free_space()` dans `YoutubeDownloader::download()`
+- Minimum requis : 100 MB d'espace libre
+- Message d'erreur explicite avec espace restant en MB
+- Évite la saturation du disque serveur
+
+---
+
+### 3. Système de Queue pour Téléchargements (Future V3)
+**Problème :** Les très longs téléchargements (compilations 1h+) peuvent bloquer l'interface.
 
 **Solution future :**
 - Table BDD `download_queue` (id, video_id, status, progress)
@@ -236,7 +259,17 @@ Si vous avez déjà une base de données avec des chansons :
 3. Vérifier header `X-CSRF-Token` dans la requête
 4. Essayer de rejouer la requête sans token → doit échouer 403
 
+### Test Protection Timeout
+1. Créer un dossier test avec 100+ fichiers MP3
+2. Lancer le scan depuis l'interface
+3. Vérifier que le scan se termine sans erreur 504/timeout
+
+### Test Espace Disque
+1. Remplir le disque jusqu'à avoir <100 MB libres
+2. Essayer de télécharger une chanson YouTube
+3. Vérifier le message d'erreur explicite avec espace restant
+
 ---
 
 **Date de mise à jour :** 25 Janvier 2026
-**Version :** 2.0
+**Version :** 2.0.1

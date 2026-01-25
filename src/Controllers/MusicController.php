@@ -138,6 +138,9 @@ class MusicController
     {
         csrf_verify();
         
+        // Autoriser le script à tourner sans limite de temps pour scanner de grandes bibliothèques
+        set_time_limit(0);
+        
         $files = $this->musicModel->scanMusicDirectory();
         $imported = 0;
 
