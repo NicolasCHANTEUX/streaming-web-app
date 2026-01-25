@@ -64,8 +64,14 @@ class SearchController
             // Extract metadata from the downloaded file
             $metadata = $this->musicModel->extractMetadata($downloadResult['file_path']);
 
+            // Normaliser les chemins pour la base de données (utiliser DIRECTORY_SEPARATOR)
+            $normalizedFilePath = str_replace('/', DIRECTORY_SEPARATOR, $downloadResult['file_path']);
+            $normalizedCoverPath = isset($downloadResult['cover_path']) 
+                ? str_replace('/', DIRECTORY_SEPARATOR, $downloadResult['cover_path'])
+                : null;
+
             // Check if song already exists in database by file_path
-            $existingSong = $this->musicModel->getByFilePath($downloadResult['file_path']);
+            $existingSong = $this->musicModel->getByFilePath($normalizedFilePath);
             
             if ($existingSong) {
                 // Song already exists, return its ID
@@ -83,10 +89,10 @@ class SearchController
                 'title' => $customTitle ?: $metadata['title'],
                 'artist' => $metadata['artist'],
                 'album' => 'YouTube Downloads',
-                'file_path' => $downloadResult['file_path'],
+                'file_path' => $normalizedFilePath,
                 'duration' => $metadata['duration'],
                 'youtube_id' => $videoId,
-                'cover_path' => $downloadResult['cover_path'] ?? null
+                'cover_path' => $normalizedCoverPath
             ]);
 
             json([

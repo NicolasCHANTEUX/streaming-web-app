@@ -42,53 +42,89 @@ class MusicController
 
     public function stream(string $id): void
     {
-        $song = $this->musicModel->getById((int)$id);
+        try {
+            $song = $this->musicModel->getById((int)$id);
 
-        if (!$song || !file_exists($song->file_path)) {
-            http_response_code(404);
-            echo "File not found";
-            return;
-        }
+            if (!$song) {
+                error_log("Stream error: Song ID {$id} not found in database");
+                http_response_code(404);
+                echo "Song not found";
+                return;
+            }
 
-        $filePath = $song->file_path;
-        $fileSize = filesize($filePath);
-        $mime = mime_content_type($filePath);
+            error_log("Stream: Song ID {$id}, file_path: {$song->file_path}");
+            error_log("Stream: file_exists: " . (file_exists($song->file_path) ? 'YES' : 'NO'));
 
-        // Support for range requests (seeking in audio)
-        $start = 0;
-        $end = $fileSize - 1;
+            if (!file_exists($song->file_path)) {
+                error_log("Stream error: File does not exist: {$song->file_path}");
+                http_response_code(404);
+                echo "File not found on disk";
+                return;
+            }
 
-        if (isset($_SERVER['HTTP_RANGE'])) {
-            $range = $_SERVER['HTTP_RANGE'];
-            $range = str_replace('bytes=', '', $range);
-            list($start, $end) = explode('-', $range);
+            $filePath = $song->file_path;
+            $fileSize = filesize($filePath);
             
-            $start = intval($start);
-            $end = $end ? intval($end) : $fileSize - 1;
+            // Fallback for Windows where mime_content_type might not be available
+            if (function_exists('mime_content_type')) {
+                $mime = mime_content_type($filePath);
+            } else {
+                // Default to audio/mpeg for MP3 files
+                $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                $mime = match($extension) {
+                    'mp3' => 'audio/mpeg',
+                    'mp4', 'm4a' => 'audio/mp4',
+                    'ogg' => 'audio/ogg',
+                    'wav' => 'audio/wav',
+                    'flac' => 'audio/flac',
+                    default => 'audio/mpeg'
+                };
+            }
 
-            header('HTTP/1.1 206 Partial Content');
-            header("Content-Range: bytes {$start}-{$end}/{$fileSize}");
+            error_log("Stream: Starting stream - Size: {$fileSize}, Mime: {$mime}");
+
+            // Support for range requests (seeking in audio)
+            $start = 0;
+            $end = $fileSize - 1;
+
+            if (isset($_SERVER['HTTP_RANGE'])) {
+                $range = $_SERVER['HTTP_RANGE'];
+                $range = str_replace('bytes=', '', $range);
+                list($start, $end) = explode('-', $range);
+                
+                $start = intval($start);
+                $end = $end ? intval($end) : $fileSize - 1;
+
+                header('HTTP/1.1 206 Partial Content');
+                header("Content-Range: bytes {$start}-{$end}/{$fileSize}");
+            }
+
+            header("Content-Type: {$mime}");
+            header("Accept-Ranges: bytes");
+            header("Content-Length: " . ($end - $start + 1));
+
+            $fp = fopen($filePath, 'rb');
+            fseek($fp, $start);
+            
+            $buffer = 8192;
+            $bytesRemaining = $end - $start + 1;
+
+            while ($bytesRemaining > 0 && !feof($fp)) {
+                $bytesToRead = min($buffer, $bytesRemaining);
+                echo fread($fp, $bytesToRead);
+                flush();
+                $bytesRemaining -= $bytesToRead;
+            }
+
+            fclose($fp);
+            exit;
+            
+        } catch (\Exception $e) {
+            error_log("Stream exception: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            http_response_code(500);
+            echo "Error streaming file";
         }
-
-        header("Content-Type: {$mime}");
-        header("Accept-Ranges: bytes");
-        header("Content-Length: " . ($end - $start + 1));
-
-        $fp = fopen($filePath, 'rb');
-        fseek($fp, $start);
-        
-        $buffer = 8192;
-        $bytesRemaining = $end - $start + 1;
-
-        while ($bytesRemaining > 0 && !feof($fp)) {
-            $bytesToRead = min($buffer, $bytesRemaining);
-            echo fread($fp, $bytesToRead);
-            flush();
-            $bytesRemaining -= $bytesToRead;
-        }
-
-        fclose($fp);
-        exit;
     }
 
     public function delete(string $id): void

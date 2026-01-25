@@ -244,7 +244,11 @@ class YoutubeDownloader
 
     private function findLatestFile(string $directory, string $extension): ?string
     {
-        $files = glob($directory . '/*.' . $extension);
+        // Normaliser le chemin pour glob() (utilise toujours /)
+        $directory = str_replace('\\', '/', $directory);
+        
+        $pattern = $directory . '/*.' . $extension;
+        $files = glob($pattern);
         
         if (empty($files)) {
             return null;
@@ -255,6 +259,9 @@ class YoutubeDownloader
             return filemtime($b) - filemtime($a);
         });
 
-        return $files[0];
+        // Normaliser le résultat pour utiliser les séparateurs du système
+        $latestFile = str_replace('/', DIRECTORY_SEPARATOR, $files[0]);
+        
+        return $latestFile;
     }
 }
