@@ -5,8 +5,8 @@ return [
     'database' => [
         'host'     => getenv('DB_HOST') ?: 'localhost',
         'name'     => getenv('DB_NAME') ?: 'music_streaming',
-        'user'     => getenv('DB_USER') ?: 'root',
-        'password' => getenv('DB_PASS') ?: 'MYSnicolas10',
+        'user'     => getenv('DB_USER') ?: 'music_user',
+        'password' => getenv('DB_PASS') ?: '123',
     ],
 
     // Paths
