@@ -11,6 +11,29 @@ session_start();
 // Error reporting (disable in production)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../storage/logs/php_errors.log');
+
+// Créer le dossier de logs s'il n'existe pas
+$logDir = __DIR__ . '/../storage/logs';
+if (!is_dir($logDir)) {
+    mkdir($logDir, 0777, true);
+}
+
+// Gestionnaire d'exceptions global pour capturer toutes les erreurs
+set_exception_handler(function($exception) {
+    error_log("Uncaught Exception: " . $exception->getMessage());
+    error_log("Stack trace: " . $exception->getTraceAsString());
+    
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => false,
+        'error' => 'Internal Server Error: ' . $exception->getMessage(),
+        'trace' => $exception->getTraceAsString()
+    ]);
+    exit;
+});
 
 // Create router instance
 $router = new Router();

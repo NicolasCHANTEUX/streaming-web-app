@@ -20,6 +20,13 @@ class Music
         return $result ?: null;
     }
 
+    public function getByFilePath(string $filePath): ?object
+    {
+        $stmt = Database::query("SELECT * FROM songs WHERE file_path = ?", [$filePath]);
+        $result = $stmt->fetch();
+        return $result ?: null;
+    }
+
     public function search(string $query): array
     {
         $searchTerm = "%{$query}%";

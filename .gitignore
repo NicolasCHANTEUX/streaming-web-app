@@ -7,6 +7,8 @@
 Thumbs.db
 /storage/music/*
 !/storage/music/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
 /public/assets/images/covers/*
 !/public/assets/images/covers/.gitkeep
 /public/assets/css/output.css

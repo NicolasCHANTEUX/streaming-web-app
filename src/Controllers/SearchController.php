@@ -41,49 +41,70 @@ class SearchController
 
     public function download(): void
     {
-        // Vérifier le token CSRF
-        csrf_verify();
-        
-        $videoId = input('video_id', '');
-        $customTitle = input('custom_title', null);
+        try {
+            // Vérifier le token CSRF
+            csrf_verify();
+            
+            $videoId = input('video_id', '');
+            $customTitle = input('custom_title', null);
 
-        if (empty($videoId)) {
-            json(['success' => false, 'error' => 'Video ID is required'], 400);
-            return;
+            if (empty($videoId)) {
+                json(['success' => false, 'error' => 'Video ID is required'], 400);
+                return;
+            }
+
+            // Download the video directly
+            $downloadResult = $this->downloader->download($videoId, $customTitle);
+
+            if (!$downloadResult['success']) {
+                json($downloadResult, 500);
+                return;
+            }
+
+            // Extract metadata from the downloaded file
+            $metadata = $this->musicModel->extractMetadata($downloadResult['file_path']);
+
+            // Check if song already exists in database by file_path
+            $existingSong = $this->musicModel->getByFilePath($downloadResult['file_path']);
+            
+            if ($existingSong) {
+                // Song already exists, return its ID
+                json([
+                    'success' => true,
+                    'message' => 'Song already exists in library',
+                    'song_id' => $existingSong->id,
+                    'already_exists' => true
+                ]);
+                return;
+            }
+
+            // Add to database
+            $songId = $this->musicModel->create([
+                'title' => $customTitle ?: $metadata['title'],
+                'artist' => $metadata['artist'],
+                'album' => 'YouTube Downloads',
+                'file_path' => $downloadResult['file_path'],
+                'duration' => $metadata['duration'],
+                'youtube_id' => $videoId,
+                'cover_path' => $downloadResult['cover_path'] ?? null
+            ]);
+
+            json([
+                'success' => true,
+                'message' => 'Download completed',
+                'song_id' => $songId
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("Download error: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            
+            json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
         }
-
-        // Get video info first
-        $videoInfo = $this->downloader->getVideoInfo($videoId);
-
-        if (!$videoInfo) {
-            json(['success' => false, 'error' => 'Could not fetch video info'], 500);
-            return;
-        }
-
-        // Download the video
-        $downloadResult = $this->downloader->download($videoId, $customTitle);
-
-        if (!$downloadResult['success']) {
-            json($downloadResult, 500);
-            return;
-        }
-
-        // Add to database
-        $songId = $this->musicModel->create([
-            'title' => $customTitle ?? $videoInfo['title'],
-            'artist' => $videoInfo['artist'],
-            'album' => 'YouTube Downloads',
-            'file_path' => $downloadResult['file_path'],
-            'duration' => $videoInfo['duration'],
-            'youtube_id' => $videoId,
-            'cover_path' => $downloadResult['cover_path'] ?? null
-        ]);
-
-        json([
-            'success' => true,
-            'message' => 'Download completed',
-            'song_id' => $songId
-        ]);
     }
 
     public function status(): void

@@ -6,10 +6,25 @@ class YoutubeDownloader
 {
     private string $ytdlpPath;
     private string $musicPath;
+    private string $ffmpegOption;
 
     public function __construct()
     {
-        $this->ytdlpPath = config('ytdlp.path', 'yt-dlp');
+        $ytdlpPath = config('ytdlp.path', 'yt-dlp');
+        $ffmpegPath = config('ytdlp.ffmpeg_path', '');
+        
+        // Échapper le chemin pour Windows (chemins avec espaces)
+        // Sur Windows, utiliser des guillemets doubles, sur Linux/Mac escapeshellarg suffit
+        if (DIRECTORY_SEPARATOR === '\\') {
+            // Windows: entourer de guillemets doubles
+            $this->ytdlpPath = '"' . $ytdlpPath . '"';
+            $this->ffmpegOption = $ffmpegPath ? '--ffmpeg-location "' . $ffmpegPath . '"' : '';
+        } else {
+            // Linux/Mac: utiliser escapeshellarg
+            $this->ytdlpPath = escapeshellarg($ytdlpPath);
+            $this->ffmpegOption = $ffmpegPath ? '--ffmpeg-location ' . escapeshellarg($ffmpegPath) : '';
+        }
+        
         $this->musicPath = config('paths.music');
     }
 
@@ -24,7 +39,14 @@ class YoutubeDownloader
         }
 
         // Add "Audio" to search for better music results
-        $searchQuery = escapeshellarg("ytsearch{$maxResults}:{$query} Audio");
+        $searchString = "ytsearch{$maxResults}:{$query} Audio";
+        
+        // Sur Windows, utiliser des guillemets doubles au lieu de escapeshellarg
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $searchQuery = '"' . $searchString . '"';
+        } else {
+            $searchQuery = escapeshellarg($searchString);
+        }
 
         $cmd = "{$this->ytdlpPath} {$searchQuery} --dump-json --flat-playlist --no-playlist 2>&1";
 
@@ -75,7 +97,7 @@ class YoutubeDownloader
             ];
         }
 
-        $url = "https://www.youtube.com/watch?v=" . escapeshellarg($videoId);
+        $url = "https://www.youtube.com/watch?v=" . $videoId;
         
         // Output template
         $outputTemplate = $this->musicPath . '/%(title)s.%(ext)s';
@@ -83,17 +105,31 @@ class YoutubeDownloader
             $outputTemplate = $this->musicPath . '/' . $this->sanitizeFilename($customTitle) . '.%(ext)s';
         }
 
-        $outputArg = escapeshellarg($outputTemplate);
+        // Sur Windows, utiliser des guillemets doubles au lieu de escapeshellarg
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $outputArg = '"' . $outputTemplate . '"';
+            $urlArg = '"' . $url . '"';
+        } else {
+            $outputArg = escapeshellarg($outputTemplate);
+            $urlArg = escapeshellarg($url);
+        }
 
         // Command to download audio only in MP3 format
         // --write-thumbnail sauvegarde aussi l'image séparément
         // --convert-thumbnails jpg convertit en JPG pour compatibilité web
-        $cmd = "{$this->ytdlpPath} -x --audio-format mp3 --audio-quality 0 " .
+        $cmd = "{$this->ytdlpPath} {$this->ffmpegOption} -x --audio-format mp3 --audio-quality 0 " .
                "--embed-thumbnail --add-metadata " .
                "--write-thumbnail --convert-thumbnails jpg " .
-               "--output {$outputArg} {$url} 2>&1";
+               "--output {$outputArg} {$urlArg} 2>&1";
+
+        // Log de la commande pour debug
+        error_log("Executing yt-dlp command: " . $cmd);
 
         exec($cmd, $output, $returnCode);
+
+        // Log du résultat
+        error_log("yt-dlp return code: {$returnCode}");
+        error_log("yt-dlp output: " . implode("\n", $output));
 
         if ($returnCode !== 0) {
             $errorMsg = implode("\n", $output);
@@ -135,12 +171,26 @@ class YoutubeDownloader
      */
     public function getVideoInfo(string $videoId): ?array
     {
-        $url = escapeshellarg("https://www.youtube.com/watch?v={$videoId}");
-        $cmd = "{$this->ytdlpPath} {$url} --dump-json --no-playlist 2>&1";
+        $urlString = "https://www.youtube.com/watch?v={$videoId}";
+        
+        // Sur Windows, utiliser des guillemets doubles au lieu de escapeshellarg
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $url = '"' . $urlString . '"';
+        } else {
+            $url = escapeshellarg($urlString);
+        }
+        
+        $cmd = "{$this->ytdlpPath} {$this->ffmpegOption} {$url} --dump-json --no-playlist 2>&1";
+
+        error_log("getVideoInfo command: " . $cmd);
 
         exec($cmd, $output, $returnCode);
 
+        error_log("getVideoInfo return code: {$returnCode}");
+        error_log("getVideoInfo output: " . implode("\n", $output));
+
         if ($returnCode !== 0) {
+            error_log("getVideoInfo failed for video {$videoId}");
             return null;
         }
 

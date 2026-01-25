@@ -98,7 +98,13 @@ async function downloadVideo(videoId, title) {
                 statusDiv.classList.add('hidden');
             }, 3000);
         } else {
-            statusDiv.innerHTML = '<div class="p-4 rounded-lg bg-red-500/20 text-red-500 border border-red-500 inline-flex items-center gap-2"><i class="fas fa-times"></i> Download failed: ' + data.error + '</div>';
+            console.error('Download error:', data);
+            let errorMsg = data.error || 'Unknown error';
+            if (data.trace) {
+                console.error('Stack trace:', data.trace);
+                errorMsg += ' (see console for details)';
+            }
+            statusDiv.innerHTML = '<div class="p-4 rounded-lg bg-red-500/20 text-red-500 border border-red-500"><i class="fas fa-times"></i> Download failed: ' + errorMsg + '</div>';
         }
     } catch (error) {
         statusDiv.innerHTML = '<div class="p-4 rounded-lg bg-red-500/20 text-red-500 border border-red-500 inline-flex items-center gap-2"><i class="fas fa-times"></i> An error occurred</div>';
