@@ -1,0 +1,9 @@
+<!-- SVG placeholder for default cover -->
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="300" fill="#282828"/>
+  <g transform="translate(150,150)">
+    <circle cx="0" cy="-20" r="30" fill="#1db954" opacity="0.3"/>
+    <path d="M -30 0 L -30 40 L 0 25 L 30 40 L 30 0 Z" fill="#1db954" opacity="0.5"/>
+    <text x="0" y="80" font-family="Arial" font-size="16" fill="#b3b3b3" text-anchor="middle">No Cover</text>
+  </g>
+</svg>

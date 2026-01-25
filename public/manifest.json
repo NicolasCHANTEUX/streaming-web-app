@@ -1,0 +1,22 @@
+{
+    "name": "MyMusic Streaming",
+    "short_name": "MyMusic",
+    "description": "Personal music streaming application",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1a1a1a",
+    "theme_color": "#1a1a1a",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/assets/images/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/assets/images/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

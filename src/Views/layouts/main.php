@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#121212">
+    <title><?= e($title ?? 'Music Streaming') ?></title>
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="<?= asset('css/output.css') ?>">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-bg-main text-text-main font-sans">
+    <?php component('header'); ?>
+    
+    <main class="pt-header pb-[calc(theme(spacing.nav)+theme(spacing.player))] px-5 max-w-7xl mx-auto min-h-screen">
+        <?php 
+        if (isset($content)) {
+            view($content, $data ?? []);
+        }
+        ?>
+    </main>
+
+    <?php component('player-bar'); ?>
+    <?php component('navigation'); ?>
+
+    <!-- Scripts -->
+    <script src="<?= asset('js/player.js') ?>"></script>
+    <script src="<?= asset('js/app.js') ?>"></script>
+</body>
+</html>

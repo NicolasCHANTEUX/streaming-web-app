@@ -1,0 +1,12 @@
+{
+  "name": "streaming-web-app",
+  "version": "1.0.0",
+  "description": "Personal music streaming application",
+  "scripts": {
+    "build": "tailwindcss -i ./src/input.css -o ./public/assets/css/output.css",
+    "watch": "tailwindcss -i ./src/input.css -o ./public/assets/css/output.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}
