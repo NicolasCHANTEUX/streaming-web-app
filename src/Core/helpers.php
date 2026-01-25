@@ -100,3 +100,35 @@ function input(string $key, $default = null)
 {
     return $_POST[$key] ?? $_GET[$key] ?? $default;
 }
+
+/**
+ * Get CSRF token
+ */
+function csrf_token(): string
+{
+    return \App\Core\CSRF::getToken();
+}
+
+/**
+ * Get CSRF token field
+ */
+function csrf_field(): string
+{
+    return \App\Core\CSRF::field();
+}
+
+/**
+ * Get CSRF meta tag
+ */
+function csrf_meta(): string
+{
+    return \App\Core\CSRF::metaTag();
+}
+
+/**
+ * Verify CSRF token
+ */
+function csrf_verify(): void
+{
+    \App\Core\CSRF::verify();
+}

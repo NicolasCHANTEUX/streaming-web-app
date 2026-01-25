@@ -1,5 +1,25 @@
 // Main Application JavaScript
 
+// Setup CSRF token for all AJAX requests
+function setupCSRF() {
+    const token = document.querySelector('meta[name="csrf-token"]');
+    if (token) {
+        // Add CSRF token to all fetch requests
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options = {}) {
+            // Only add token for POST, PUT, DELETE requests
+            if (!options.method || ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method.toUpperCase())) {
+                options.headers = options.headers || {};
+                options.headers['X-CSRF-Token'] = token.content;
+            }
+            return originalFetch(url, options);
+        };
+    }
+}
+
+// Initialize CSRF on page load
+setupCSRF();
+
 // Utility Functions
 function escapeHtml(text) {
     const div = document.createElement('div');

@@ -93,6 +93,8 @@ class MusicController
 
     public function delete(string $id): void
     {
+        csrf_verify();
+        
         $song = $this->musicModel->getById((int)$id);
 
         if ($song) {
@@ -134,18 +136,24 @@ class MusicController
 
     public function scan(): void
     {
+        csrf_verify();
+        
         $files = $this->musicModel->scanMusicDirectory();
         $imported = 0;
 
         foreach ($files as $file) {
             $metadata = $this->musicModel->extractMetadata($file['path']);
             
+            // Extraire la pochette d'album si présente
+            $coverPath = $this->musicModel->extractCoverArt($file['path']);
+            
             $this->musicModel->create([
                 'title' => $metadata['title'],
                 'artist' => $metadata['artist'],
                 'album' => $metadata['album'],
                 'file_path' => $file['path'],
-                'duration' => $metadata['duration']
+                'duration' => $metadata['duration'],
+                'cover_path' => $coverPath
             ]);
 
             $imported++;

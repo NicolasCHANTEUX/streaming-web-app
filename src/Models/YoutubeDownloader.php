@@ -73,8 +73,11 @@ class YoutubeDownloader
         $outputArg = escapeshellarg($outputTemplate);
 
         // Command to download audio only in MP3 format
+        // --write-thumbnail sauvegarde aussi l'image séparément
+        // --convert-thumbnails jpg convertit en JPG pour compatibilité web
         $cmd = "{$this->ytdlpPath} -x --audio-format mp3 --audio-quality 0 " .
                "--embed-thumbnail --add-metadata " .
+               "--write-thumbnail --convert-thumbnails jpg " .
                "--output {$outputArg} {$url} 2>&1";
 
         exec($cmd, $output, $returnCode);
@@ -92,10 +95,25 @@ class YoutubeDownloader
             return ['success' => false, 'error' => 'File not found after download'];
         }
 
+        // Trouver et déplacer la thumbnail vers le dossier covers
+        $coverPath = null;
+        $baseFilename = pathinfo($downloadedFile, PATHINFO_FILENAME);
+        $thumbnailFile = $this->musicPath . '/' . $baseFilename . '.jpg';
+        
+        if (file_exists($thumbnailFile)) {
+            $coverFilename = md5($videoId) . '.jpg';
+            $coverDestination = config('paths.root') . '/public/assets/images/covers/' . $coverFilename;
+            
+            if (rename($thumbnailFile, $coverDestination)) {
+                $coverPath = '/assets/images/covers/' . $coverFilename;
+            }
+        }
+
         return [
             'success' => true,
             'file_path' => $downloadedFile,
-            'youtube_id' => $videoId
+            'youtube_id' => $videoId,
+            'cover_path' => $coverPath
         ];
     }
 

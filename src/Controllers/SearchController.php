@@ -41,6 +41,9 @@ class SearchController
 
     public function download(): void
     {
+        // Vérifier le token CSRF
+        csrf_verify();
+        
         $videoId = input('video_id', '');
         $customTitle = input('custom_title', null);
 
@@ -72,7 +75,8 @@ class SearchController
             'album' => 'YouTube Downloads',
             'file_path' => $downloadResult['file_path'],
             'duration' => $videoInfo['duration'],
-            'youtube_id' => $videoId
+            'youtube_id' => $videoId,
+            'cover_path' => $downloadResult['cover_path'] ?? null
         ]);
 
         json([

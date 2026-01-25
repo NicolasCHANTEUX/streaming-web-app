@@ -50,6 +50,8 @@ class PlaylistController
 
     public function create(): void
     {
+        csrf_verify();
+        
         $name = input('name', '');
         $description = input('description', '');
 
@@ -65,6 +67,8 @@ class PlaylistController
 
     public function update(string $id): void
     {
+        csrf_verify();
+        
         $data = [];
 
         if ($name = input('name')) {
@@ -87,12 +91,16 @@ class PlaylistController
 
     public function delete(string $id): void
     {
+        csrf_verify();
+        
         $this->playlistModel->delete((int)$id);
         redirect('/playlists');
     }
 
     public function addSong(string $id): void
     {
+        csrf_verify();
+        
         $songId = input('song_id', '');
 
         if (empty($songId)) {
@@ -107,6 +115,8 @@ class PlaylistController
 
     public function removeSong(string $id): void
     {
+        csrf_verify();
+        
         $songId = input('song_id', '');
 
         if (empty($songId)) {

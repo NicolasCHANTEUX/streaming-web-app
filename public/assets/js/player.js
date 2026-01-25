@@ -60,6 +60,66 @@ class AudioPlayer {
         const savedVolume = localStorage.getItem('volume') || 80;
         this.volumeSlider.value = savedVolume;
         this.audio.volume = savedVolume / 100;
+
+        // Initialize MediaSession API for mobile controls
+        this.initMediaSession();
+    }
+
+    initMediaSession() {
+        if ('mediaSession' in navigator) {
+            // Set up action handlers for mobile lock screen controls
+            navigator.mediaSession.setActionHandler('play', () => {
+                this.resume();
+            });
+
+            navigator.mediaSession.setActionHandler('pause', () => {
+                this.pause();
+            });
+
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                this.previous();
+            });
+
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                this.next();
+            });
+
+            navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+                const skipTime = details.seekOffset || 10;
+                this.audio.currentTime = Math.max(this.audio.currentTime - skipTime, 0);
+            });
+
+            navigator.mediaSession.setActionHandler('seekforward', (details) => {
+                const skipTime = details.seekOffset || 10;
+                this.audio.currentTime = Math.min(this.audio.currentTime + skipTime, this.audio.duration);
+            });
+
+            navigator.mediaSession.setActionHandler('seekto', (details) => {
+                if (details.fastSeek && 'fastSeek' in this.audio) {
+                    this.audio.fastSeek(details.seekTime);
+                } else {
+                    this.audio.currentTime = details.seekTime;
+                }
+                this.updateProgress();
+            });
+        }
+    }
+
+    updateMediaSession(song) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.title || 'Unknown Title',
+                artist: song.artist || 'Unknown Artist',
+                album: song.album || 'Unknown Album',
+                artwork: [
+                    {
+                        src: song.cover_path || '/assets/images/default-cover.svg',
+                        sizes: '512x512',
+                        type: 'image/jpeg'
+                    }
+                ]
+            });
+        }
     }
 
     async play(songId) {
@@ -79,6 +139,9 @@ class AudioPlayer {
             this.playerTitle.textContent = song.title;
             this.playerArtist.textContent = song.artist || 'Unknown Artist';
             this.playerCover.src = song.cover_path || '/assets/images/default-cover.svg';
+
+            // Update MediaSession metadata for mobile lock screen
+            this.updateMediaSession(song);
 
             // Load audio
             this.audio.src = `/stream/${songId}`;

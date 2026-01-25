@@ -2,6 +2,8 @@
 
 Une application web de streaming musical personnelle permettant d'écouter votre collection de musique et de télécharger de nouveaux titres depuis YouTube. **Design moderne avec Tailwind CSS**.
 
+> 📖 **[Voir les améliorations V2.0](IMPROVEMENTS-V2.md)** - Métadonnées réelles, covers, MediaSession API, protection CSRF
+
 ## Fonctionnalités
 
 - 🎵 **Streaming Audio** : Écoutez votre collection de musique en MP3
@@ -10,6 +12,10 @@ Une application web de streaming musical personnelle permettant d'écouter votre
 - 📂 **Gestion de Playlists** : Créez et organisez vos playlists
 - ⚡ **Lecteur Audio Moderne** : Contrôles play/pause, volume, seek
 - 🎨 **Interface Dark Mode** : Design sombre et épuré inspiré de Spotify
+- 🎭 **Métadonnées ID3** : Lecture automatique des tags (titre, artiste, album, durée) via getID3
+- 🖼️ **Pochettes d'album** : Extraction automatique des covers depuis YouTube et fichiers MP3
+- 📲 **Contrôles Mobile** : MediaSession API pour contrôler la musique écran verrouillé
+- 🔒 **Protection CSRF** : Sécurité renforcée contre les attaques cross-site
 
 ## Prérequis
 
