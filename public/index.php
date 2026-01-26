@@ -7,12 +7,12 @@ use App\Core\Router;
 
 // On charge le fichier .env s'il existe
 try {
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+    $dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__ . '/../');
     $dotenv->load();
 } catch (Exception $e) {
     // Si pas de .env (ex: prod sans fichier), on continue sans planter
     // mais dans ton cas, c'est ce qui va sauver la mise
-    error_log("Note: .env file not found or could not be loaded.");
+    error_log("DOTENV ERROR: " . $e->getMessage());
 }
 
 // Start session
