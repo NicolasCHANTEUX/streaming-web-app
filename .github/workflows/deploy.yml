@@ -68,6 +68,12 @@ jobs:
         sudo chmod -R 777 storage
         sudo chmod -R 777 public/assets/images/covers
 
+        # 1. On donne le fichier au groupe du serveur web (www-data)
+        sudo chown nicolas:www-data /var/www/music_streaming/.env
+
+        # 2. On s'assure que le groupe a le droit de lire (640 = Toi écris, Groupe lit)
+        sudo chmod 640 /var/www/music_streaming/.env
+
     # --- Redémarrage ---
     - name: 🔄 Redémarrage du serveur web
       run: |
