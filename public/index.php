@@ -80,5 +80,10 @@ $router->post('/api/music/{id}/delete', 'MusicController', 'delete');
 $router->get('/api/music/{id}', 'ApiController', 'getSong');
 $router->get('/api/playlists', 'ApiController', 'getAllPlaylists');
 
+// Like routes
+$router->get('/liked', 'LikeController', 'index');
+$router->post('/like/{id}/toggle', 'LikeController', 'toggle');
+$router->get('/like/{id}/check', 'LikeController', 'check');
+
 // Dispatch the request
 $router->dispatch();

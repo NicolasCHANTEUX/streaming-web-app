@@ -225,4 +225,122 @@ if ('IntersectionObserver' in window) {
     });
 }
 
+// Like Management
+async function toggleLike(songId, buttonElement) {
+    try {
+        const response = await fetch(`/like/${songId}/toggle`, {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const icon = buttonElement.querySelector('i');
+            
+            if (result.liked) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                buttonElement.classList.add('text-primary');
+                showNotification('Ajouté aux favoris', 'success');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                buttonElement.classList.remove('text-primary');
+                showNotification('Retiré des favoris', 'success');
+            }
+            
+            // Update player like button if same song
+            if (Player.currentSongId === songId) {
+                updatePlayerLikeButton(result.liked);
+            }
+        }
+    } catch (error) {
+        console.error('Error toggling like:', error);
+        showNotification('Erreur lors de l\'opération', 'error');
+    }
+}
+
+function updatePlayerLikeButton(isLiked) {
+    const playerLikeBtn = document.getElementById('likeBtn');
+    if (playerLikeBtn) {
+        const icon = playerLikeBtn.querySelector('i');
+        if (isLiked) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            playerLikeBtn.classList.add('text-primary');
+        } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+            playerLikeBtn.classList.remove('text-primary');
+        }
+    }
+}
+
+async function checkLikeStatus(songId) {
+    try {
+        const response = await fetch(`/like/${songId}/check`);
+        const result = await response.json();
+        updatePlayerLikeButton(result.liked);
+        
+        // Update card like button
+        const cardBtn = document.querySelector(`.like-btn[data-song-id="${songId}"]`);
+        if (cardBtn) {
+            const icon = cardBtn.querySelector('i');
+            if (result.liked) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                cardBtn.classList.add('text-primary');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                cardBtn.classList.remove('text-primary');
+            }
+        }
+    } catch (error) {
+        console.error('Error checking like status:', error);
+    }
+}
+
+// Initialize like buttons on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Load like status for all visible songs
+    document.querySelectorAll('.like-btn').forEach(async (btn) => {
+        const songId = btn.dataset.songId;
+        if (songId) {
+            try {
+                const response = await fetch(`/like/${songId}/check`);
+                const result = await response.json();
+                
+                if (result.liked) {
+                    const icon = btn.querySelector('i');
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    btn.classList.add('text-primary');
+                }
+            } catch (error) {
+                console.error('Error loading like status:', error);
+            }
+        }
+    });
+    
+    // Setup player like button
+    const playerLikeBtn = document.getElementById('likeBtn');
+    if (playerLikeBtn) {
+        playerLikeBtn.addEventListener('click', () => {
+            if (Player.currentSongId) {
+                const cardBtn = document.querySelector(`.like-btn[data-song-id="${Player.currentSongId}"]`);
+                if (cardBtn) {
+                    toggleLike(Player.currentSongId, cardBtn);
+                } else {
+                    // Create a temporary button element for the toggle
+                    const tempBtn = document.createElement('button');
+                    tempBtn.innerHTML = playerLikeBtn.innerHTML;
+                    tempBtn.className = playerLikeBtn.className;
+                    toggleLike(Player.currentSongId, playerLikeBtn);
+                }
+            }
+        });
+    }
+});
+
 console.log('Music Streaming App initialized');

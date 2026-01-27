@@ -68,8 +68,12 @@ function createYoutubeCard(result) {
                 <p class="text-sm text-text-sub">${escapeHtml(result.channel)}</p>
             </div>
             <div class="flex-shrink-0">
-                <button onclick="downloadVideo('${result.id}', '${escapeHtml(result.title).replace(/'/g, "\\'")}')\" class="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-primary-hover transition-colors inline-flex items-center gap-2">
-                    <i class="fas fa-download"></i> Download
+                <button onclick="downloadVideo('${result.id}', '${escapeHtml(result.title).replace(/'/g, "\\'")}')\" 
+                        class="download-btn px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-primary-hover transition-colors inline-flex items-center gap-2"
+                        data-video-id="${result.id}">
+                    <i class="fas fa-download"></i> 
+                    <span class="btn-text">Download</span>
+                    <div class="hidden spinner w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 </button>
             </div>
         </div>
@@ -77,39 +81,24 @@ function createYoutubeCard(result) {
 }
 
 async function downloadVideo(videoId, title) {
-    const statusDiv = document.getElementById('downloadStatus');
-    statusDiv.classList.remove('hidden');
-    statusDiv.innerHTML = '<div class="p-4 rounded-lg bg-blue-500/20 text-blue-500 border border-blue-500 inline-flex items-center gap-2"><i class="fas fa-download"></i> Downloading...</div>';
+    // Get the button
+    const button = document.querySelector(`.download-btn[data-video-id="${videoId}"]`);
+    if (!button) return;
     
-    try {
-        const response = await fetch('/api/youtube/download', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'video_id=' + encodeURIComponent(videoId) + '&custom_title=' + encodeURIComponent(title)
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            statusDiv.innerHTML = '<div class="p-4 rounded-lg bg-primary/20 text-primary border border-primary inline-flex items-center gap-2"><i class="fas fa-check"></i> Download completed!</div>';
-            setTimeout(() => {
-                statusDiv.classList.add('hidden');
-            }, 3000);
-        } else {
-            console.error('Download error:', data);
-            let errorMsg = data.error || 'Unknown error';
-            if (data.trace) {
-                console.error('Stack trace:', data.trace);
-                errorMsg += ' (see console for details)';
-            }
-            statusDiv.innerHTML = '<div class="p-4 rounded-lg bg-red-500/20 text-red-500 border border-red-500"><i class="fas fa-times"></i> Download failed: ' + errorMsg + '</div>';
-        }
-    } catch (error) {
-        statusDiv.innerHTML = '<div class="p-4 rounded-lg bg-red-500/20 text-red-500 border border-red-500 inline-flex items-center gap-2"><i class="fas fa-times"></i> An error occurred</div>';
-        console.error(error);
-    }
+    // Show spinner
+    button.disabled = true;
+    button.querySelector('.btn-text').textContent = 'Downloading';
+    button.querySelector('.spinner').classList.remove('hidden');
+    
+    // Add to download queue
+    addToDownloadQueue(videoId, title);
+    
+    // Reset button after a short delay
+    setTimeout(() => {
+        button.disabled = false;
+        button.querySelector('.btn-text').textContent = 'Download';
+        button.querySelector('.spinner').classList.add('hidden');
+    }, 1000);
 }
 
 function escapeHtml(text) {

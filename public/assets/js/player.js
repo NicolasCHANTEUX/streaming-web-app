@@ -143,6 +143,11 @@ class AudioPlayer {
             // Update MediaSession metadata for mobile lock screen
             this.updateMediaSession(song);
 
+            // Check like status
+            if (typeof checkLikeStatus === 'function') {
+                checkLikeStatus(songId);
+            }
+
             // Load audio
             this.audio.src = `/stream/${songId}`;
             this.currentSongId = songId;

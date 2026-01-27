@@ -26,10 +26,20 @@
     </div>
     
     <div class="flex gap-2 ml-2">
-        <button class="text-text-sub hover:text-text-main p-2.5 transition-colors" onclick="addToPlaylist(<?= e($track->id) ?>)" title="Add to playlist">
+        <button class="like-btn text-text-sub hover:text-primary p-2.5 transition-colors" 
+                onclick="toggleLike(<?= e($track->id) ?>, this)" 
+                data-song-id="<?= e($track->id) ?>"
+                title="Ajouter aux favoris">
+            <i class="far fa-heart"></i>
+        </button>
+        <button class="text-text-sub hover:text-text-main p-2.5 transition-colors" 
+                onclick="showPlaylistModal(<?= e($track->id) ?>)" 
+                title="Ajouter à une playlist">
             <i class="fas fa-plus"></i>
         </button>
-        <button class="text-text-sub hover:text-text-main p-2.5 transition-colors" onclick="showOptions(<?= e($track->id) ?>)" title="More options">
+        <button class="text-text-sub hover:text-text-main p-2.5 transition-colors" 
+                onclick="showOptions(<?= e($track->id) ?>)" 
+                title="Plus d'options">
             <i class="fas fa-ellipsis-v"></i>
         </button>
     </div>

@@ -31,9 +31,12 @@
 
     <?php component('player-bar'); ?>
     <?php component('navigation'); ?>
+    <?php component('modal'); ?>
 
     <!-- Scripts -->
     <script src="<?= asset('js/player.js') ?>"></script>
     <script src="<?= asset('js/app.js') ?>"></script>
+    <script src="<?= asset('js/modal.js') ?>"></script>
+    <script src="<?= asset('js/download.js') ?>"></script>
 </body>
 </html>
