@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Core\Database;
 use PDO;
 
 class Like
@@ -10,8 +11,7 @@ class Like
 
     public function __construct()
     {
-        $database = new \App\Core\Database();
-        $this->db = $database->pdo;
+        $this->db = Database::connect();
     }
 
     public function isLiked(int $songId): bool

@@ -20,9 +20,10 @@ class LikeController
     {
         $songs = $this->likeModel->getLikedSongs();
         
-        view('pages/liked', [
+        view('layouts/main', [
             'title' => 'Titres Likés - Music Streaming',
-            'songs' => $songs
+            'content' => 'pages/liked',
+            'data' => ['songs' => $songs]
         ]);
     }
 

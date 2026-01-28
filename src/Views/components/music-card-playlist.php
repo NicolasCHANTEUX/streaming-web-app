@@ -1,9 +1,10 @@
 <?php
 /**
- * Music card component (track row style)
+ * Music card component for playlists (with remove button)
  * @var object $track - Song object with id, title, artist, cover_path, duration
  * @var int $index - Optional track number
  * @var bool $showIndex - Whether to show track number instead of cover
+ * @var int $playlistId - The playlist ID for removal
  */
 ?>
 <div class="group flex items-center px-4 py-3 rounded-lg hover:bg-bg-card transition-all cursor-pointer" 
@@ -49,6 +50,11 @@
                 data-song-id="<?= e($track->id) ?>"
                 title="Ajouter aux favoris">
             <i class="far fa-heart text-base"></i>
+        </button>
+        <button class="text-text-sub hover:text-red-500 p-2 transition-colors rounded-full hover:bg-bg-surface" 
+                onclick="removeSongFromPlaylist(<?= e($track->id) ?>)" 
+                title="Retirer de la playlist">
+            <i class="fas fa-trash text-base"></i>
         </button>
         <button class="text-text-sub hover:text-text-main p-2 transition-colors rounded-full hover:bg-bg-surface" 
                 onclick="showSongOptions(<?= e($track->id) ?>, '<?= e($track->title) ?>', '<?= e($track->artist ?? '') ?>')" 

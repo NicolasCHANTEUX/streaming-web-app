@@ -27,16 +27,30 @@ class SearchController
 
     public function searchYoutube(): void
     {
+        error_log("=== YOUTUBE SEARCH START ===");
+        
         $query = input('q', '');
+        error_log("Query received: " . $query);
 
         if (empty($query)) {
+            error_log("Query is empty, returning error");
             json(['success' => false, 'error' => 'Query is required'], 400);
             return;
         }
 
-        $results = $this->downloader->search($query, 10);
-
-        json(['success' => true, 'results' => $results]);
+        error_log("Calling downloader->search() with query: " . $query);
+        
+        try {
+            $results = $this->downloader->search($query, 10);
+            error_log("Search returned " . count($results) . " results");
+            error_log("Results: " . json_encode($results));
+            
+            json(['success' => true, 'results' => $results]);
+        } catch (\Exception $e) {
+            error_log("ERROR in searchYoutube: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function download(): void

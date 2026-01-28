@@ -5,8 +5,13 @@ window.openModal = function(title, bodyContent, buttons = []) {
     const modalBody = document.getElementById('modalBody');
     const modalFooter = document.getElementById('modalFooter');
     
+    console.log('openModal called with title:', title);
+    console.log('Current modalBody content before:', modalBody.innerHTML.substring(0, 200));
+    
     modalTitle.textContent = title;
     modalBody.innerHTML = bodyContent;
+    
+    console.log('New modalBody content after:', modalBody.innerHTML.substring(0, 200));
     
     // Build footer buttons
     modalFooter.innerHTML = '';
@@ -30,6 +35,13 @@ window.openModal = function(title, bodyContent, buttons = []) {
     overlay.classList.remove('hidden');
     overlay.classList.add('flex');
     document.body.style.overflow = 'hidden';
+    
+    // Debug: check for input after a short delay
+    setTimeout(() => {
+        const input = document.getElementById('playlistName');
+        console.log('Input element after modal open:', input);
+        console.log('Input HTML:', input ? input.outerHTML : 'NOT FOUND');
+    }, 100);
 };
 
 window.closeModal = function() {
@@ -142,9 +154,9 @@ window.showCreatePlaylistModal = function() {
     const bodyContent = `
         <div class="space-y-4">
             <div>
-                <label class="block text-sm font-medium mb-2">Nom de la playlist</label>
-                <input type="text" id="playlistName" 
-                       class="w-full px-4 py-2 bg-bg-card border border-border-main rounded-lg focus:outline-none focus:border-primary"
+                <label class="block text-sm font-medium mb-2 text-text-main">Nom de la playlist</label>
+                <input type="text" id="modalPlaylistName" 
+                       class="w-full px-4 py-2 bg-bg-card border border-border-main rounded-lg focus:outline-none focus:border-primary text-text-main"
                        placeholder="Ma super playlist">
             </div>
         </div>
@@ -164,29 +176,72 @@ window.showCreatePlaylistModal = function() {
                 text: 'Créer',
                 className: 'px-4 py-2 rounded-lg bg-primary text-white hover:bg-opacity-90 transition-colors',
                 onClick: async () => {
-                    const name = document.getElementById('playlistName').value.trim();
+                    // Search within modal only
+                    const modal = document.getElementById('modalBody');
+                    const nameInput = modal.querySelector('#modalPlaylistName');
+                    const name = nameInput ? nameInput.value.trim() : '';
+                    
+                    console.log('=== CREATE PLAYLIST DEBUG ===');
+                    console.log('Modal element:', modal);
+                    console.log('Input element:', nameInput);
+                    console.log('Name value:', name);
+                    console.log('Name length:', name.length);
                     
                     if (!name) {
+                        console.error('Validation failed: empty name');
                         showNotification('Veuillez entrer un nom', 'error');
                         return;
                     }
                     
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                    console.log('CSRF token meta:', csrfToken);
+                    console.log('CSRF token value:', csrfToken ? csrfToken.content : 'NULL');
+                    
+                    const requestBody = `name=${encodeURIComponent(name)}`;
+                    console.log('Request body:', requestBody);
+                    
+                    const headers = { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-Token': csrfToken ? csrfToken.content : ''
+                    };
+                    console.log('Request headers:', headers);
+                    
                     try {
-                        const res = await fetch('/playlists/create', {
+                        console.log('Sending request to /api/playlists/create');
+                        const res = await fetch('/api/playlists/create', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: `name=${encodeURIComponent(name)}`
+                            headers: headers,
+                            body: requestBody
                         });
                         
-                        if (res.ok) {
+                        console.log('Response status:', res.status);
+                        console.log('Response headers:', [...res.headers.entries()]);
+                        
+                        const responseText = await res.text();
+                        console.log('Response text:', responseText);
+                        
+                        let data;
+                        try {
+                            data = JSON.parse(responseText);
+                            console.log('Parsed JSON:', data);
+                        } catch (e) {
+                            console.error('JSON parse error:', e);
+                            console.error('Raw response:', responseText);
+                            showNotification('Erreur: réponse invalide du serveur', 'error');
+                            return;
+                        }
+                        
+                        if (res.ok && data.success) {
                             closeModal();
                             showNotification('Playlist créée !', 'success');
                             setTimeout(() => window.location.reload(), 1000);
                         } else {
-                            showNotification('Erreur lors de la création', 'error');
+                            console.error('Server error:', data);
+                            showNotification(data.error || 'Erreur lors de la création', 'error');
                         }
                     } catch (error) {
-                        console.error(error);
+                        console.error('Fetch error:', error);
+                        console.error('Error stack:', error.stack);
                         showNotification('Erreur réseau', 'error');
                     }
                 }

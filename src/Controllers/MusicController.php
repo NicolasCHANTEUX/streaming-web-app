@@ -200,4 +200,112 @@ class MusicController
 
         json(['success' => true, 'imported' => $imported]);
     }
+
+    /**
+     * Get song information as JSON
+     */
+    public function getSongInfo(string $id): void
+    {
+        $song = $this->musicModel->getById((int)$id);
+
+        if (!$song) {
+            json(['success' => false, 'error' => 'Song not found'], 404);
+            return;
+        }
+
+        // Get file size if file exists
+        $fileSize = file_exists($song->file_path) ? filesize($song->file_path) : 0;
+
+        json([
+            'success' => true,
+            'song' => [
+                'id' => $song->id,
+                'title' => $song->title,
+                'artist' => $song->artist,
+                'album' => $song->album,
+                'duration' => $song->duration,
+                'cover_path' => $song->cover_path,
+                'file_size' => $fileSize,
+                'created_at' => $song->created_at
+            ]
+        ]);
+    }
+
+    /**
+     * Update song information
+     */
+    public function updateSongInfo(string $id): void
+    {
+        csrf_verify();
+
+        $song = $this->musicModel->getById((int)$id);
+
+        if (!$song) {
+            json(['success' => false, 'error' => 'Song not found'], 404);
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        $updateData = [];
+        if (isset($input['title'])) {
+            $updateData['title'] = trim($input['title']);
+        }
+        if (isset($input['artist'])) {
+            $updateData['artist'] = trim($input['artist']);
+        }
+        if (isset($input['album'])) {
+            $updateData['album'] = trim($input['album']);
+        }
+
+        if (empty($updateData)) {
+            json(['success' => false, 'error' => 'No data to update'], 400);
+            return;
+        }
+
+        $result = $this->musicModel->update((int)$id, $updateData);
+
+        if ($result) {
+            json(['success' => true, 'message' => 'Song updated successfully']);
+        } else {
+            json(['success' => false, 'error' => 'Failed to update song'], 500);
+        }
+    }
+
+    /**
+     * Delete song
+     */
+    public function deleteSong(string $id): void
+    {
+        csrf_verify();
+
+        $song = $this->musicModel->getById((int)$id);
+
+        if (!$song) {
+            json(['success' => false, 'error' => 'Song not found'], 404);
+            return;
+        }
+
+        // Delete file from disk
+        if (file_exists($song->file_path)) {
+            unlink($song->file_path);
+        }
+
+        // Delete cover if exists
+        if ($song->cover_path) {
+            $coverFullPath = config('paths.root') . '/public' . $song->cover_path;
+            if (file_exists($coverFullPath)) {
+                unlink($coverFullPath);
+            }
+        }
+
+        // Delete from database
+        $result = $this->musicModel->delete((int)$id);
+
+        if ($result) {
+            json(['success' => true, 'message' => 'Song deleted successfully']);
+        } else {
+            json(['success' => false, 'error' => 'Failed to delete song'], 500);
+        }
+    }
 }

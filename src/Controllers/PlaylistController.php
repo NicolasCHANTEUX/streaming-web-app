@@ -50,17 +50,38 @@ class PlaylistController
 
     public function create(): void
     {
-        csrf_verify();
+        error_log("=== CREATE PLAYLIST DEBUG ===");
+        error_log("Request method: " . $_SERVER['REQUEST_METHOD']);
+        error_log("Content-Type: " . ($_SERVER['CONTENT_TYPE'] ?? 'not set'));
+        error_log("POST data: " . print_r($_POST, true));
+        error_log("Raw input: " . file_get_contents('php://input'));
+        error_log("Session data: " . print_r($_SESSION ?? [], true));
+        error_log("CSRF token from POST: " . ($_POST['csrf_token'] ?? 'not set'));
+        error_log("CSRF token from header: " . ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? 'not set'));
+        
+        try {
+            csrf_verify();
+            error_log("CSRF verification passed");
+        } catch (\Exception $e) {
+            error_log("CSRF verification failed: " . $e->getMessage());
+            throw $e;
+        }
         
         $name = input('name', '');
         $description = input('description', '');
+        
+        error_log("Name from input: '$name'");
+        error_log("Description from input: '$description'");
 
         if (empty($name)) {
+            error_log("Validation failed: empty name");
             json(['success' => false, 'error' => 'Name is required'], 400);
             return;
         }
 
+        error_log("Creating playlist with name: $name");
         $playlistId = $this->playlistModel->create($name, $description);
+        error_log("Playlist created with ID: $playlistId");
 
         json(['success' => true, 'playlist_id' => $playlistId]);
     }

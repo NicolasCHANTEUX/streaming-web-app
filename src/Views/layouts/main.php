@@ -32,11 +32,13 @@
     <?php component('player-bar'); ?>
     <?php component('navigation'); ?>
     <?php component('modal'); ?>
+    <?php component('song-options-modal'); ?>
 
     <!-- Scripts -->
-    <script src="<?= asset('js/player.js') ?>"></script>
-    <script src="<?= asset('js/app.js') ?>"></script>
-    <script src="<?= asset('js/modal.js') ?>"></script>
-    <script src="<?= asset('js/download.js') ?>"></script>
+    <script src="<?= asset('js/player.js') ?>?v=<?= time() ?>"></script>
+    <script src="<?= asset('js/app.js') ?>?v=<?= time() ?>"></script>
+    <script src="<?= asset('js/modal.js') ?>?v=<?= time() ?>"></script>
+    <script src="<?= asset('js/download.js') ?>?v=<?= time() ?>"></script>
+    <script src="<?= asset('js/song-options.js') ?>?v=<?= time() ?>"></script>
 </body>
 </html>

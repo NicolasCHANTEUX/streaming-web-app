@@ -8,9 +8,13 @@ function setupCSRF() {
         const originalFetch = window.fetch;
         window.fetch = function(url, options = {}) {
             // Only add token for POST, PUT, DELETE requests
-            if (!options.method || ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method.toUpperCase())) {
+            if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method.toUpperCase())) {
                 options.headers = options.headers || {};
-                options.headers['X-CSRF-Token'] = token.content;
+                if (typeof options.headers === 'object' && !(options.headers instanceof Headers)) {
+                    options.headers['X-CSRF-Token'] = token.content;
+                } else if (options.headers instanceof Headers) {
+                    options.headers.set('X-CSRF-Token', token.content);
+                }
             }
             return originalFetch(url, options);
         };

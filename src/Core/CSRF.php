@@ -59,9 +59,21 @@ class CSRF
      */
     public static function verify(): void
     {
-        $token = $_POST[self::TOKEN_NAME] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+        error_log("=== CSRF VERIFY DEBUG ===");
+        error_log("Session ID: " . session_id());
+        error_log("Session token: " . ($_SESSION[self::TOKEN_NAME] ?? 'not set'));
+        error_log("POST token: " . ($_POST[self::TOKEN_NAME] ?? 'not set'));
+        error_log("HTTP_X_CSRF_TOKEN: " . ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? 'not set'));
+        
+        // Check multiple sources for the token
+        $token = $_POST[self::TOKEN_NAME] 
+            ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
+            ?? (function_exists('apache_request_headers') ? (apache_request_headers()['X-CSRF-Token'] ?? null) : null);
+        
+        error_log("Final token used: " . ($token ?? 'NULL'));
 
         if (!self::validateToken($token)) {
+            error_log("CSRF validation FAILED");
             http_response_code(403);
             json([
                 'success' => false,
@@ -69,6 +81,8 @@ class CSRF
             ]);
             exit;
         }
+        
+        error_log("CSRF validation SUCCESS");
     }
 
     /**

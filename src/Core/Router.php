@@ -16,6 +16,16 @@ class Router
         $this->addRoute('POST', $path, $controller, $method);
     }
 
+    public function put(string $path, string $controller, string $method): void
+    {
+        $this->addRoute('PUT', $path, $controller, $method);
+    }
+
+    public function delete(string $path, string $controller, string $method): void
+    {
+        $this->addRoute('DELETE', $path, $controller, $method);
+    }
+
     private function addRoute(string $httpMethod, string $path, string $controller, string $method): void
     {
         $this->routes[] = [

@@ -80,6 +80,11 @@ $router->post('/api/music/{id}/delete', 'MusicController', 'delete');
 $router->get('/api/music/{id}', 'ApiController', 'getSong');
 $router->get('/api/playlists', 'ApiController', 'getAllPlaylists');
 
+// Song management routes
+$router->get('/api/songs/{id}', 'MusicController', 'getSongInfo');
+$router->put('/api/songs/{id}', 'MusicController', 'updateSongInfo');
+$router->delete('/api/songs/{id}', 'MusicController', 'deleteSong');
+
 // Like routes
 $router->get('/liked', 'LikeController', 'index');
 $router->post('/like/{id}/toggle', 'LikeController', 'toggle');

@@ -27,8 +27,13 @@ class ApiController
 
     public function getAllPlaylists(): void
     {
+        error_log('=== GET ALL PLAYLISTS API ===');
         $playlistModel = new \App\Models\Playlist();
         $playlists = $playlistModel->getAll();
+        
+        error_log('Playlists count: ' . count($playlists));
+        error_log('Playlists type: ' . gettype($playlists));
+        error_log('Playlists data: ' . json_encode($playlists));
 
         json(['success' => true, 'playlists' => $playlists]);
     }

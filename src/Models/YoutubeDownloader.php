@@ -13,17 +13,15 @@ class YoutubeDownloader
         $ytdlpPath = config('ytdlp.path', 'yt-dlp');
         $ffmpegPath = config('ytdlp.ffmpeg_path', '');
         
-        // Échapper le chemin pour Windows (chemins avec espaces)
-        // Sur Windows, utiliser des guillemets doubles, sur Linux/Mac escapeshellarg suffit
-        if (DIRECTORY_SEPARATOR === '\\') {
-            // Windows: entourer de guillemets doubles
-            $this->ytdlpPath = '"' . $ytdlpPath . '"';
-            $this->ffmpegOption = $ffmpegPath ? '--ffmpeg-location "' . $ffmpegPath . '"' : '';
-        } else {
-            // Linux/Mac: utiliser escapeshellarg
-            $this->ytdlpPath = escapeshellarg($ytdlpPath);
-            $this->ffmpegOption = $ffmpegPath ? '--ffmpeg-location ' . escapeshellarg($ffmpegPath) : '';
-        }
+        error_log("YoutubeDownloader init - ytdlpPath from config: " . $ytdlpPath);
+        error_log("YoutubeDownloader init - ffmpegPath from config: " . $ffmpegPath);
+        
+        // Sur Windows et autres OS, utiliser directement la commande (pas de guillemets)
+        $this->ytdlpPath = $ytdlpPath;
+        $this->ffmpegOption = $ffmpegPath ? '--ffmpeg-location ' . escapeshellarg($ffmpegPath) : '';
+        
+        error_log("YoutubeDownloader init - final ytdlpPath: " . $this->ytdlpPath);
+        error_log("YoutubeDownloader init - final ffmpegOption: " . $this->ffmpegOption);
         
         $this->musicPath = config('paths.music');
     }
@@ -41,16 +39,17 @@ class YoutubeDownloader
         // Add "Audio" to search for better music results
         $searchString = "ytsearch{$maxResults}:{$query} Audio";
         
-        // Sur Windows, utiliser des guillemets doubles au lieu de escapeshellarg
-        if (DIRECTORY_SEPARATOR === '\\') {
-            $searchQuery = '"' . $searchString . '"';
-        } else {
-            $searchQuery = escapeshellarg($searchString);
-        }
+        // Échapper correctement la query
+        $searchQuery = escapeshellarg($searchString);
 
         $cmd = "{$this->ytdlpPath} {$searchQuery} --dump-json --flat-playlist --no-playlist 2>&1";
+        
+        error_log("yt-dlp search command: " . $cmd);
 
         exec($cmd, $output, $returnCode);
+        
+        error_log("yt-dlp return code: " . $returnCode);
+        error_log("yt-dlp output lines: " . count($output));
 
         if ($returnCode !== 0) {
             error_log("yt-dlp search error: " . implode("\n", $output));
@@ -85,7 +84,9 @@ class YoutubeDownloader
         }
 
         // Vérifier l'espace disque disponible (minimum 100 MB)
-        $freeSpace = disk_free_space($this->musicPath);
+        // Utiliser le chemin absolu ou le répertoire racine pour disk_free_space
+        $checkPath = realpath($this->musicPath) ?: __DIR__;
+        $freeSpace = @disk_free_space($checkPath);
         $minSpace = 100 * 1024 * 1024; // 100 MB
         
         if ($freeSpace === false || $freeSpace < $minSpace) {
@@ -117,9 +118,11 @@ class YoutubeDownloader
         // Command to download audio only in MP3 format
         // --write-thumbnail sauvegarde aussi l'image séparément
         // --convert-thumbnails jpg convertit en JPG pour compatibilité web
+        // Ajouter des options pour éviter les erreurs 403 de YouTube
         $cmd = "{$this->ytdlpPath} {$this->ffmpegOption} -x --audio-format mp3 --audio-quality 0 " .
                "--embed-thumbnail --add-metadata " .
                "--write-thumbnail --convert-thumbnails jpg " .
+               "--extractor-args \"youtube:player_client=android\" " .
                "--output {$outputArg} {$urlArg} 2>&1";
 
         // Log de la commande pour debug

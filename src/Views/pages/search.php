@@ -34,24 +34,36 @@ async function searchYoutube(event) {
     const query = document.getElementById('youtubeQuery').value;
     const resultsDiv = document.getElementById('searchResults');
     
+    console.log('=== YOUTUBE SEARCH FRONTEND ===');
+    console.log('Query:', query);
+    
     // Show loading
     resultsDiv.innerHTML = '<div class="flex flex-col items-center justify-center py-10"><div class="w-12 h-12 border-4 border-border-main border-t-primary rounded-full animate-spin"></div><p class="mt-4 text-text-sub">Searching YouTube...</p></div>';
     
     try {
-        const response = await fetch('/api/youtube/search?q=' + encodeURIComponent(query));
-        const data = await response.json();
+        const url = '/api/youtube/search?q=' + encodeURIComponent(query);
+        console.log('Fetching URL:', url);
         
-        if (data.success && data.results.length > 0) {
+        const response = await fetch(url);
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (data.success && data.results && data.results.length > 0) {
+            console.log('Found', data.results.length, 'results');
             resultsDiv.innerHTML = '';
             data.results.forEach(result => {
                 resultsDiv.innerHTML += createYoutubeCard(result);
             });
         } else {
+            console.log('No results or error:', data);
             resultsDiv.innerHTML = '<div class="text-center py-16 text-text-sub"><p>No results found</p></div>';
         }
     } catch (error) {
+        console.error('ERROR in searchYoutube:', error);
         resultsDiv.innerHTML = '<div class="p-4 rounded-lg bg-red-500/20 text-red-500 border border-red-500">An error occurred while searching</div>';
-        console.error(error);
     }
 }
 
