@@ -141,40 +141,57 @@
             </div>
 
             <!-- Progress Section -->
-            <div id="importProgress" class="hidden mb-6">
+            <div id="progressSection" class="hidden mb-6">
                 <div class="bg-bg-card border border-border-main rounded-lg p-6">
                     <div class="mb-4">
                         <div class="flex justify-between items-center mb-2">
                             <h3 class="text-lg font-bold text-text-main">Progression</h3>
-                            <span class="text-text-sub text-sm"><span id="currentTrack">0</span> / <span id="totalToImport">0</span></span>
+                            <span class="text-text-sub text-sm"><span id="currentProgress">0</span> / <span id="totalProgress">0</span></span>
                         </div>
                         <div class="w-full h-3 bg-bg-surface rounded-full overflow-hidden">
                             <div id="progressBar" class="h-full bg-gradient-to-r from-primary to-green-500 transition-all duration-300" style="width: 0%"></div>
                         </div>
                     </div>
 
-                    <!-- Statistics Grid -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                        <div class="text-center p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                            <div class="text-2xl font-bold text-green-500" id="downloadedCount">0</div>
-                            <div class="text-xs text-text-sub">Téléchargés</div>
-                        </div>
-                        <div class="text-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                            <div class="text-2xl font-bold text-blue-500" id="existsCount">0</div>
-                            <div class="text-xs text-text-sub">Déjà présents</div>
-                        </div>
-                        <div class="text-center p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-                            <div class="text-2xl font-bold text-yellow-500" id="skippedCount">0</div>
-                            <div class="text-xs text-text-sub">Ignorés</div>
-                        </div>
-                        <div class="text-center p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                            <div class="text-2xl font-bold text-red-500" id="errorsCount">0</div>
-                            <div class="text-xs text-text-sub">Erreurs</div>
-                        </div>
+                    <!-- Current Track Info -->
+                    <div id="currentTrackInfo" class="text-sm text-text-sub text-center mb-4">
+                        En attente...
                     </div>
+                </div>
+            </div>
 
-                    <!-- Import Log -->
-                    <div class="bg-bg-surface rounded-lg p-4 max-h-60 overflow-y-auto custom-scrollbar" id="importLogs"></div>
+            <!-- Statistics -->
+            <div id="statsSection" class="hidden mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="text-center p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <div class="text-2xl font-bold text-green-500" id="statDownloaded">0</div>
+                        <div class="text-xs text-text-sub">Téléchargés</div>
+                    </div>
+                    <div class="text-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                        <div class="text-2xl font-bold text-blue-500" id="statExists">0</div>
+                        <div class="text-xs text-text-sub">Déjà présents</div>
+                    </div>
+                    <div class="text-center p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                        <div class="text-2xl font-bold text-yellow-500" id="statSkipped">0</div>
+                        <div class="text-xs text-text-sub">Ignorés</div>
+                    </div>
+                    <div class="text-center p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                        <div class="text-2xl font-bold text-red-500" id="statErrors">0</div>
+                        <div class="text-xs text-text-sub">Erreurs</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import Logs -->
+            <div id="importLogsSection" class="hidden mb-6">
+                <div class="bg-black rounded-lg overflow-hidden border border-border-main">
+                    <div class="bg-bg-card px-4 py-3 border-b border-border-main flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-text-main flex items-center gap-2">
+                            <i class="fas fa-terminal text-primary"></i>
+                            Logs d'importation
+                        </h3>
+                    </div>
+                    <div class="p-4 max-h-96 overflow-y-auto custom-scrollbar font-mono text-xs" id="importLogs"></div>
                 </div>
             </div>
         </div>

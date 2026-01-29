@@ -73,19 +73,27 @@ window.showPlaylistModal = async function(songId) {
             return;
         }
         
-        let bodyContent = '<div class="space-y-2">';
+        let bodyContent = '<div class="space-y-3">';
         playlists.forEach(playlist => {
             const cover = playlist.cover_path || '/assets/images/default-playlist.png';
             bodyContent += `
-                <div class="playlist-option flex items-center gap-3 p-3 rounded-lg hover:bg-bg-card cursor-pointer transition-colors border-2 border-transparent" 
+                <div class="playlist-option group flex items-center gap-4 p-4 rounded-xl bg-bg-card border-2 border-border-main hover:border-primary hover:bg-bg-hover cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md" 
                      data-playlist-id="${playlist.id}"
                      onclick="selectPlaylist(this)">
-                    <img src="${cover}" alt="${playlist.name}" class="w-12 h-12 rounded object-cover">
-                    <div class="flex-1">
-                        <div class="font-semibold">${playlist.name}</div>
-                        <div class="text-xs text-text-sub">${playlist.song_count || 0} titre(s)</div>
+                    <div class="relative flex-shrink-0">
+                        <img src="${cover}" alt="${playlist.name}" class="w-14 h-14 rounded-lg object-cover shadow-sm">
+                        <div class="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 rounded-lg transition-all duration-200"></div>
                     </div>
-                    <i class="fas fa-check text-primary opacity-0 check-icon"></i>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-text-main group-hover:text-primary transition-colors truncate">${playlist.name}</div>
+                        <div class="text-sm text-text-sub mt-0.5 flex items-center gap-1.5">
+                            <i class="fas fa-music text-xs"></i>
+                            <span>${playlist.song_count || 0} titre${(playlist.song_count || 0) > 1 ? 's' : ''}</span>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-bg-surface border-2 border-border-main group-hover:border-primary flex items-center justify-center transition-all duration-200">
+                        <i class="fas fa-check text-primary opacity-0 check-icon transition-opacity duration-200 text-sm"></i>
+                    </div>
                 </div>
             `;
         });
@@ -96,13 +104,29 @@ window.showPlaylistModal = async function(songId) {
         window.selectPlaylist = function(element) {
             // Remove selection from all
             document.querySelectorAll('.playlist-option').forEach(opt => {
-                opt.classList.remove('border-primary');
+                opt.classList.remove('border-primary', 'bg-primary/5');
                 opt.querySelector('.check-icon').classList.add('opacity-0');
+                const circle = opt.querySelector('.w-8');
+                if (circle) {
+                    circle.classList.remove('bg-primary', 'border-primary');
+                    circle.classList.add('bg-bg-surface', 'border-border-main');
+                }
             });
             
-            // Select this one
-            element.classList.add('border-primary');
-            element.querySelector('.check-icon').classList.remove('opacity-0');
+            // Select this one with enhanced visual feedback
+            element.classList.add('border-primary', 'bg-primary/5');
+            const checkIcon = element.querySelector('.check-icon');
+            const circle = element.querySelector('.w-8');
+            
+            checkIcon.classList.remove('opacity-0');
+            checkIcon.classList.add('opacity-100');
+            
+            if (circle) {
+                circle.classList.remove('bg-bg-surface', 'border-border-main');
+                circle.classList.add('bg-primary', 'border-primary');
+                checkIcon.classList.add('text-white');
+            }
+            
             selectedPlaylistId = element.dataset.playlistId;
         };
         
