@@ -1,4 +1,4 @@
-<nav class="fixed bottom-player left-0 right-0 h-nav bg-bg-surface flex justify-around items-center border-t border-border-main z-40">
+<nav id="bottomNav" class="fixed bottom-0 left-0 right-0 h-nav bg-bg-surface flex justify-around items-center border-t border-border-main z-40">
     <a href="/" class="flex flex-col items-center gap-1 text-text-sub py-2.5 px-4 transition-colors <?= ($_SERVER['REQUEST_URI'] == '/') ? 'text-primary' : 'hover:text-text-main' ?>">
         <i class="fas fa-home text-xl"></i>
         <span class="text-xs">Home</span>

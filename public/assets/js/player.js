@@ -155,6 +155,9 @@ class AudioPlayer {
             // Show player bar
             this.playerBar.style.display = 'flex';
             this.playerBar.classList.remove('hidden');
+            
+            // Adjust navigation and main content when player is visible
+            this.adjustLayoutForPlayer(true);
 
             // Play
             await this.audio.play();
@@ -225,6 +228,23 @@ class AudioPlayer {
 
     onPause() {
         this.playPauseBtn.querySelector('i').className = 'fas fa-play';
+    }
+
+    adjustLayoutForPlayer(isPlayerVisible) {
+        const bottomNav = document.getElementById('bottomNav');
+        const mainContent = document.getElementById('mainContent');
+        
+        if (isPlayerVisible) {
+            // Player visible: move nav up by 90px (player height)
+            bottomNav.style.bottom = '90px';
+            // Add padding to main content: 60px (nav) + 90px (player) = 150px
+            mainContent.style.paddingBottom = '150px';
+        } else {
+            // Player hidden: nav at bottom
+            bottomNav.style.bottom = '0';
+            // Only nav padding: 60px
+            mainContent.style.paddingBottom = '60px';
+        }
     }
 }
 

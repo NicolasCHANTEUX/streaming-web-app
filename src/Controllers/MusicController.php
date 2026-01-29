@@ -289,13 +289,30 @@ class MusicController
         // Delete file from disk
         if (file_exists($song->file_path)) {
             unlink($song->file_path);
+            error_log("Deleted music file: {$song->file_path}");
         }
 
         // Delete cover if exists
         if ($song->cover_path) {
-            $coverFullPath = config('paths.root') . '/public' . $song->cover_path;
+            // Handle both absolute and relative paths
+            if (strpos($song->cover_path, '/') === 0) {
+                // Path starts with / (e.g., /assets/images/covers/xxx.webp)
+                $coverFullPath = config('paths.root') . '/public' . $song->cover_path;
+            } else {
+                // Path doesn't start with / (e.g., assets/images/covers/xxx.webp)
+                $coverFullPath = config('paths.root') . '/public/' . $song->cover_path;
+            }
+            
+            error_log("Attempting to delete cover: {$coverFullPath}");
+            
             if (file_exists($coverFullPath)) {
-                unlink($coverFullPath);
+                if (unlink($coverFullPath)) {
+                    error_log("✓ Successfully deleted cover: {$coverFullPath}");
+                } else {
+                    error_log("✗ Failed to delete cover: {$coverFullPath}");
+                }
+            } else {
+                error_log("✗ Cover file not found: {$coverFullPath}");
             }
         }
 

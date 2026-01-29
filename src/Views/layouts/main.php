@@ -21,7 +21,7 @@
 <body class="bg-bg-main text-text-main font-sans">
     <?php component('header'); ?>
     
-    <main class="pt-header pb-[calc(theme(spacing.nav)+theme(spacing.player))] px-5 max-w-7xl mx-auto min-h-screen">
+    <main id="mainContent" class="pt-24 pb-nav px-5 max-w-7xl mx-auto min-h-screen">
         <?php 
         if (isset($content)) {
             view($content, $data ?? []);

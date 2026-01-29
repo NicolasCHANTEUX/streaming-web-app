@@ -398,3 +398,65 @@ function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute('content') : '';
 }
+
+/**
+ * Initialize drag and drop functionality
+ */
+function initDragAndDrop() {
+    const dropZone = document.querySelector('label[for="csvFileInput"]').parentElement;
+    const fileInput = document.getElementById('csvFileInput');
+    
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    // Highlight drop zone when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.add('border-primary', 'bg-primary/5');
+            dropZone.classList.remove('border-border-main');
+        }, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.remove('border-primary', 'bg-primary/5');
+            dropZone.classList.add('border-border-main');
+        }, false);
+    });
+    
+    // Handle dropped files
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            const file = files[0];
+            
+            // Check if it's a CSV file
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                // Set file to input element
+                fileInput.files = files;
+                
+                // Trigger the handleFileSelect function
+                handleFileSelect({ target: { files: files } });
+            } else {
+                alert('Veuillez déposer un fichier CSV (.csv)');
+            }
+        }
+    }, false);
+}
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+// Initialize drag and drop when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDragAndDrop);
+} else {
+    initDragAndDrop();
+}
