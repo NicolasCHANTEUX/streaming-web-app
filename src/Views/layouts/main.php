@@ -40,5 +40,8 @@
     <script src="<?= asset('js/modal.js') ?>?v=<?= time() ?>"></script>
     <script src="<?= asset('js/download.js') ?>?v=<?= time() ?>"></script>
     <script src="<?= asset('js/song-options.js') ?>?v=<?= time() ?>"></script>
+    
+    <!-- SPA Navigation - Keep music playing during page changes -->
+    <script src="<?= asset('js/spa.js') ?>?v=<?= time() ?>"></script>
 </body>
 </html>

@@ -2,17 +2,17 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
-
-class AddController extends Controller
+class AddController
 {
     /**
      * Display the unified add music page (YouTube search + Spotify CSV import)
      */
-    public function index()
+    public function index(): void
     {
-        $this->view('pages/add', [
-            'title' => 'Add Music'
+        view('layouts/main', [
+            'title' => 'Add Music',
+            'content' => 'pages/add',
+            'data' => []
         ]);
     }
 }
