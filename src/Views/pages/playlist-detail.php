@@ -25,9 +25,9 @@
                 </div>
             </div>
             
-            <?php if (!empty($songs)): ?>
             <!-- Actions principales -->
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 flex-wrap">
+                <?php if (!empty($songs)): ?>
                 <button onclick="playAll()" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
                     <i class="fas fa-play text-sm"></i>
                     Tout lire
@@ -36,12 +36,16 @@
                     <i class="fas fa-shuffle"></i>
                     Aléatoire
                 </button>
+                <?php endif; ?>
                 <button onclick="showAddSongsModal()" class="inline-flex items-center gap-3 px-6 py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
                     <i class="fas fa-plus"></i>
                     Ajouter
                 </button>
+                <button onclick="deletePlaylist(<?= $playlist->id ?>)" class="inline-flex items-center gap-3 px-6 py-4 rounded-full border-2 border-red-500/50 text-red-500 font-semibold hover:border-red-500 hover:bg-red-500/10 transition-all">
+                    <i class="fas fa-trash"></i>
+                    Supprimer
+                </button>
             </div>
-            <?php endif; ?>
         </div>
     </div>
 
@@ -169,6 +173,36 @@ async function removeSongFromPlaylist(songId) {
         alert('Une erreur est survenue');
         console.error(error);
     }
+}
+
+async function deletePlaylist(id) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette playlist ? Cette action est irréversible.')) return;
+    
+    try {
+        const response = await fetch(`/api/playlists/${id}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': getCsrfToken()
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.href = '/playlists';
+        } else {
+            alert('Erreur lors de la suppression de la playlist');
+        }
+    } catch (error) {
+        alert('Une erreur est survenue');
+        console.error(error);
+    }
+}
+
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
 }
 
 function showAddSongsModal() {

@@ -9,14 +9,9 @@
         <span class="text-xs">Library</span>
     </a>
     
-    <a href="/search" class="flex flex-col items-center gap-1 text-text-sub py-2.5 px-4 transition-colors <?= str_starts_with($_SERVER['REQUEST_URI'], '/search') ? 'text-primary' : 'hover:text-text-main' ?>">
-        <i class="fas fa-search text-xl"></i>
-        <span class="text-xs">Search</span>
-    </a>
-    
-    <a href="/import" class="flex flex-col items-center gap-1 text-text-sub py-2.5 px-4 transition-colors <?= str_starts_with($_SERVER['REQUEST_URI'], '/import') ? 'text-primary' : 'hover:text-text-main' ?>">
-        <i class="fab fa-spotify text-xl"></i>
-        <span class="text-xs">Import</span>
+    <a href="/add" class="flex flex-col items-center gap-1 text-text-sub py-2.5 px-4 transition-colors <?= str_starts_with($_SERVER['REQUEST_URI'], '/add') ? 'text-primary' : 'hover:text-text-main' ?>">
+        <i class="fas fa-plus-circle text-xl"></i>
+        <span class="text-xs">Add</span>
     </a>
     
     <a href="/liked" class="flex flex-col items-center gap-1 text-text-sub py-2.5 px-4 transition-colors <?= str_starts_with($_SERVER['REQUEST_URI'], '/liked') ? 'text-primary' : 'hover:text-text-main' ?>">

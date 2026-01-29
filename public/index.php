@@ -59,11 +59,14 @@ $router->get('/music/{id}', 'MusicController', 'show');
 $router->get('/music/search', 'MusicController', 'search');
 $router->get('/stream/{id}', 'MusicController', 'stream');
 
-// Search/Download routes
-$router->get('/search', 'SearchController', 'index');
+// Add Music routes (unified YouTube search + Spotify import)
+$router->get('/add', 'AddController', 'index');
+$router->get('/search', 'SearchController', 'index'); // Keep for backwards compatibility
+$router->get('/import', 'ImportController', 'index'); // Keep for backwards compatibility
 $router->get('/api/youtube/search', 'SearchController', 'searchYoutube');
 $router->post('/api/youtube/download', 'SearchController', 'download');
 $router->get('/api/youtube/status', 'SearchController', 'status');
+$router->post('/api/import/search-and-download', 'ImportController', 'searchAndDownload');
 
 // Playlist routes
 $router->get('/playlists', 'PlaylistController', 'index');
@@ -90,10 +93,6 @@ $router->delete('/api/songs/{id}', 'MusicController', 'deleteSong');
 $router->get('/liked', 'LikeController', 'index');
 $router->post('/like/{id}/toggle', 'LikeController', 'toggle');
 $router->get('/like/{id}/check', 'LikeController', 'check');
-
-// Import routes
-$router->get('/import', 'ImportController', 'index');
-$router->post('/api/import/search-and-download', 'ImportController', 'searchAndDownload');
 
 // Dispatch the request
 $router->dispatch();
