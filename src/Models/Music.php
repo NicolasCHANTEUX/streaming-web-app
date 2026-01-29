@@ -39,6 +39,22 @@ class Music
         return $stmt->fetchAll();
     }
 
+    /**
+     * Search for a song by exact title and artist (case insensitive)
+     * Used for duplicate detection during import
+     */
+    public function searchByTitleAndArtist(string $title, string $artist): ?object
+    {
+        $stmt = Database::query(
+            "SELECT * FROM songs 
+             WHERE LOWER(title) = LOWER(?) AND LOWER(artist) = LOWER(?)
+             LIMIT 1",
+            [$title, $artist]
+        );
+        $result = $stmt->fetch();
+        return $result ?: null;
+    }
+
     public function create(array $data): int
     {
         $stmt = Database::query(

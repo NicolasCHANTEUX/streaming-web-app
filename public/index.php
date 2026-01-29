@@ -90,5 +90,9 @@ $router->get('/liked', 'LikeController', 'index');
 $router->post('/like/{id}/toggle', 'LikeController', 'toggle');
 $router->get('/like/{id}/check', 'LikeController', 'check');
 
+// Import routes
+$router->get('/import', 'ImportController', 'index');
+$router->post('/api/import/search-and-download', 'ImportController', 'searchAndDownload');
+
 // Dispatch the request
 $router->dispatch();
