@@ -67,34 +67,43 @@ class AudioPlayer {
 
     initMediaSession() {
         if ('mediaSession' in navigator) {
+            console.log('🎧 Media Session API: Initializing handlers');
+            
             // Set up action handlers for mobile lock screen controls
             navigator.mediaSession.setActionHandler('play', () => {
+                console.log('🎧 Media Session: Play command');
                 this.resume();
             });
 
             navigator.mediaSession.setActionHandler('pause', () => {
+                console.log('🎧 Media Session: Pause command');
                 this.pause();
             });
 
             navigator.mediaSession.setActionHandler('previoustrack', () => {
+                console.log('🎧 Media Session: Previous track command');
                 this.previous();
             });
 
             navigator.mediaSession.setActionHandler('nexttrack', () => {
+                console.log('🎧 Media Session: Next track command');
                 this.next();
             });
 
             navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+                console.log('🎧 Media Session: Seek backward');
                 const skipTime = details.seekOffset || 10;
                 this.audio.currentTime = Math.max(this.audio.currentTime - skipTime, 0);
             });
 
             navigator.mediaSession.setActionHandler('seekforward', (details) => {
+                console.log('🎧 Media Session: Seek forward');
                 const skipTime = details.seekOffset || 10;
                 this.audio.currentTime = Math.min(this.audio.currentTime + skipTime, this.audio.duration);
             });
 
             navigator.mediaSession.setActionHandler('seekto', (details) => {
+                console.log('🎧 Media Session: Seek to', details.seekTime);
                 if (details.fastSeek && 'fastSeek' in this.audio) {
                     this.audio.fastSeek(details.seekTime);
                 } else {
@@ -102,6 +111,10 @@ class AudioPlayer {
                 }
                 this.updateProgress();
             });
+            
+            console.log('✅ Media Session API: All handlers registered');
+        } else {
+            console.warn('⚠️ Media Session API not supported in this browser');
         }
     }
 
@@ -181,15 +194,41 @@ class AudioPlayer {
     }
 
     previous() {
-        if (this.queue.length > 0 && this.currentIndex > 0) {
+        console.log('⏮️ Previous track requested. Queue:', this.queue.length, 'Current index:', this.currentIndex);
+        
+        if (this.queue.length === 0) {
+            console.warn('⚠️ No queue available for previous track');
+            return;
+        }
+        
+        if (this.currentIndex > 0) {
             this.currentIndex--;
+            console.log('⏮️ Playing previous track at index:', this.currentIndex);
+            this.play(this.queue[this.currentIndex]);
+        } else {
+            // Si on est au début, revenir à la fin (loop)
+            this.currentIndex = this.queue.length - 1;
+            console.log('⏮️ Looping to last track at index:', this.currentIndex);
             this.play(this.queue[this.currentIndex]);
         }
     }
 
     next() {
-        if (this.queue.length > 0 && this.currentIndex < this.queue.length - 1) {
+        console.log('⏭️ Next track requested. Queue:', this.queue.length, 'Current index:', this.currentIndex);
+        
+        if (this.queue.length === 0) {
+            console.warn('⚠️ No queue available for next track');
+            return;
+        }
+        
+        if (this.currentIndex < this.queue.length - 1) {
             this.currentIndex++;
+            console.log('⏭️ Playing next track at index:', this.currentIndex);
+            this.play(this.queue[this.currentIndex]);
+        } else {
+            // Si on est à la fin, revenir au début (loop)
+            this.currentIndex = 0;
+            console.log('⏭️ Looping to first track at index:', this.currentIndex);
             this.play(this.queue[this.currentIndex]);
         }
     }
