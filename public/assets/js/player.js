@@ -39,15 +39,19 @@ class AudioPlayer {
 
         // Progress slider
         this.progressSlider.addEventListener('input', (e) => {
-            const time = (e.target.value / 100) * this.audio.duration;
-            this.audio.currentTime = time;
+            if (this.audio.duration) {
+                const time = (e.target.value / 100) * this.audio.duration;
+                this.audio.currentTime = time;
+            }
         });
 
-        // Volume slider
-        this.volumeSlider.addEventListener('input', (e) => {
-            this.audio.volume = e.target.value / 100;
-            localStorage.setItem('volume', e.target.value);
-        });
+        // Volume slider (Desktop)
+        if (this.volumeSlider) {
+            this.volumeSlider.addEventListener('input', (e) => {
+                this.audio.volume = e.target.value / 100;
+                localStorage.setItem('volume', e.target.value);
+            });
+        }
 
         // Audio events
         this.audio.addEventListener('timeupdate', () => this.updateProgress());
@@ -58,7 +62,7 @@ class AudioPlayer {
 
         // Load saved volume
         const savedVolume = localStorage.getItem('volume') || 80;
-        this.volumeSlider.value = savedVolume;
+        if (this.volumeSlider) this.volumeSlider.value = savedVolume;
         this.audio.volume = savedVolume / 100;
 
         // Initialize MediaSession API for mobile controls
@@ -120,23 +124,39 @@ class AudioPlayer {
 
     updateMediaSession(song) {
         if ('mediaSession' in navigator) {
+            // CORRECTION: On force l'URL absolue pour l'image (nécessaire pour iOS/Android)
+            const coverUrl = song.cover_path ? new URL(song.cover_path, window.location.origin).href : null;
+            
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: song.title || 'Unknown Title',
                 artist: song.artist || 'Unknown Artist',
-                album: song.album || 'Unknown Album',
                 artwork: [
                     {
-                        src: song.cover_path || '/assets/images/default-cover.svg',
+                        src: coverUrl || window.location.origin + '/assets/images/default-cover.svg',
                         sizes: '512x512',
                         type: 'image/jpeg'
                     }
                 ]
             });
+            
+            console.log('🎵 Media Session metadata updated:', song.title, 'by', song.artist);
         }
     }
 
     async play(songId) {
         try {
+            console.log('▶️ Playing song ID:', songId, 'Queue:', this.queue, 'Current index:', this.currentIndex);
+            
+            // CORRECTION: Synchroniser l'index si la chanson est dans la file d'attente
+            // Cela permet à next/previous de savoir où on est
+            const queueIndex = this.queue.indexOf(String(songId));
+            if (queueIndex !== -1) {
+                this.currentIndex = queueIndex;
+                console.log('✅ Song found in queue at index:', queueIndex);
+            } else {
+                console.log('ℹ️ Song not in queue, playing standalone');
+            }
+            
             // Fetch song data
             const response = await fetch(`/api/music/${songId}`);
             const data = await response.json();
@@ -184,12 +204,19 @@ class AudioPlayer {
     pause() {
         this.audio.pause();
         this.isPlaying = false;
+        // On met à jour l'état de lecture pour le système
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = "paused";
+        }
     }
 
     resume() {
         if (this.audio.src) {
             this.audio.play();
             this.isPlaying = true;
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = "playing";
+            }
         }
     }
 
@@ -198,6 +225,13 @@ class AudioPlayer {
         
         if (this.queue.length === 0) {
             console.warn('⚠️ No queue available for previous track');
+            return;
+        }
+        
+        // Si on est à plus de 3 sec, on recommence le morceau (comportement standard)
+        if (this.audio.currentTime > 3) {
+            console.log('⏮️ Restarting current track (>3s played)');
+            this.audio.currentTime = 0;
             return;
         }
         
@@ -234,9 +268,12 @@ class AudioPlayer {
     }
 
     playQueue(songIds, startIndex = 0) {
-        this.queue = songIds;
+        // IMPORTANT: C'est ici qu'on remplit la file d'attente
+        // Assure-toi que les IDs sont bien stockés de manière uniforme (String)
+        this.queue = songIds.map(String);
         this.currentIndex = startIndex;
-        this.play(songIds[startIndex]);
+        console.log('🎼 Queue loaded:', this.queue.length, 'songs, starting at index:', startIndex);
+        this.play(this.queue[this.currentIndex]);
     }
 
     updateProgress() {
@@ -262,11 +299,13 @@ class AudioPlayer {
     }
 
     onPlay() {
-        this.playPauseBtn.querySelector('i').className = 'fas fa-pause';
+        this.playPauseBtn.innerHTML = '<i class="fas fa-pause text-sm sm:text-base"></i>';
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
     }
 
     onPause() {
-        this.playPauseBtn.querySelector('i').className = 'fas fa-play';
+        this.playPauseBtn.innerHTML = '<i class="fas fa-play text-sm sm:text-base"></i>';
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
     }
 
     adjustLayoutForPlayer(isPlayerVisible) {
