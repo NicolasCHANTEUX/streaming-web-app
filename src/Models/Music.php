@@ -362,4 +362,22 @@ class Music
         
         return trim($title);
     }
+
+    /**
+     * Get paginated music list
+     * @param int $page Current page number (starts at 1)
+     * @param int $limit Number of items per page
+     * @return array Array of songs
+     */
+    public function getPaginated(int $page = 1, int $limit = 24): array
+    {
+        $offset = ($page - 1) * $limit;
+        
+        $stmt = Database::query(
+            "SELECT * FROM songs ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?",
+            [$limit, $offset]
+        );
+        
+        return $stmt->fetchAll();
+    }
 }

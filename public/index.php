@@ -81,6 +81,7 @@ $router->post('/api/playlists/{id}/remove-song', 'PlaylistController', 'removeSo
 $router->post('/api/music/scan', 'MusicController', 'scan');
 $router->post('/api/music/clean-titles', 'MusicController', 'cleanAllTitles');
 $router->post('/api/music/{id}/delete', 'MusicController', 'delete');
+$router->get('/api/music/list', 'MusicController', 'apiList'); // Pagination
 $router->get('/api/music/{id}', 'ApiController', 'getSong');
 $router->get('/api/playlists', 'ApiController', 'getAllPlaylists');
 

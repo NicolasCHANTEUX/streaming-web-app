@@ -15,13 +15,41 @@ class MusicController
 
     public function index(): void
     {
-        $songs = $this->musicModel->getAll();
-
+        // Plus besoin de charger toutes les musiques ici
+        // Le JavaScript va les charger progressivement
         view('layouts/main', [
             'title' => 'All Music',
             'content' => 'pages/music',
-            'data' => ['songs' => $songs]
+            'data' => ['songs' => []]
         ]);
+    }
+
+    /**
+     * API endpoint for paginated music list
+     */
+    public function apiList(): void
+    {
+        header('Content-Type: application/json');
+        
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = 24; // Nombre de musiques par chargement
+
+        $tracks = $this->musicModel->getPaginated($page, $limit);
+
+        // Préparer les chemins d'images corrects
+        foreach ($tracks as &$track) {
+            $track->cover_path = !empty($track->cover_path) 
+                ? '/assets/images/covers/' . basename($track->cover_path)
+                : '/assets/images/default-cover.svg';
+        }
+
+        echo json_encode([
+            'success' => true,
+            'page' => $page,
+            'tracks' => $tracks,
+            'hasMore' => count($tracks) === $limit
+        ]);
+        exit;
     }
 
     public function show(string $id): void
