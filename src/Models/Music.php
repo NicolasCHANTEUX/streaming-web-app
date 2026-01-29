@@ -248,4 +248,58 @@ class Music
             return null;
         }
     }
+
+    /**
+     * Clean a title by removing HTML entities and unwanted keywords in brackets/parentheses
+     * @param string $title The title to clean
+     * @return string The cleaned title
+     */
+    public static function cleanTitle(string $title): string
+    {
+        // First, decode HTML entities (&#201; -> É, &amp; -> &, etc.)
+        $title = html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        // Keywords to remove from parentheses and brackets
+        $keywords = [
+            'officiel', 'official', 'clip', 'video', 'audio', 
+            'lyric', 'lyrics', 'visualizer', 'visualiser', 'vevo',
+            'hd', '4k', 'music video', 'official video', 'official audio',
+            'official music video', 'clip officiel', 'vidéo officielle',
+            'official lyric video', 'lyric video', 'audio only'
+        ];
+        
+        // Remove parentheses containing any of the keywords (case insensitive)
+        foreach ($keywords as $keyword) {
+            // Match parentheses with the keyword anywhere inside
+            $title = preg_replace('/\s*\([^)]*' . preg_quote($keyword, '/') . '[^)]*\)/ui', '', $title);
+        }
+        
+        // Remove brackets containing any of the keywords (case insensitive)
+        foreach ($keywords as $keyword) {
+            // Match brackets with the keyword anywhere inside
+            $title = preg_replace('/\s*\[[^\]]*' . preg_quote($keyword, '/') . '[^\]]*\]/ui', '', $title);
+        }
+        
+        // Remove keywords even when NOT in parentheses/brackets (often at the end of titles)
+        // Sort keywords by length (longest first) to match "official music video" before "official video"
+        $sortedKeywords = $keywords;
+        usort($sortedKeywords, function($a, $b) {
+            return strlen($b) - strlen($a);
+        });
+        
+        foreach ($sortedKeywords as $keyword) {
+            // Remove keyword with optional dash/pipe separator before it
+            $title = preg_replace('/\s*[-–—|]\s*' . preg_quote($keyword, '/') . '\s*$/ui', '', $title);
+            // Remove keyword at the end without separator
+            $title = preg_replace('/\s+' . preg_quote($keyword, '/') . '\s*$/ui', '', $title);
+        }
+        
+        // Clean up multiple spaces
+        $title = preg_replace('/\s+/', ' ', $title);
+        
+        // Remove trailing dashes that might be left over
+        $title = preg_replace('/\s*[-–—|]\s*$/', '', $title);
+        
+        return trim($title);
+    }
 }

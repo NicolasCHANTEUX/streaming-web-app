@@ -1,9 +1,14 @@
 <div>
     <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold">Music Library</h1>
-        <button onclick="scanLibrary()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-transparent text-text-main border border-border-main font-semibold hover:border-text-main transition-colors">
-            <i class="fas fa-sync"></i> Scan Directory
-        </button>
+        <div class="flex gap-3">
+            <button onclick="cleanAllTitles()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-transparent text-text-main border border-border-main font-semibold hover:border-text-main transition-colors">
+                <i class="fas fa-broom"></i> Clean All Titles
+            </button>
+            <button onclick="scanLibrary()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-transparent text-text-main border border-border-main font-semibold hover:border-text-main transition-colors">
+                <i class="fas fa-sync"></i> Scan Directory
+            </button>
+        </div>
     </div>
 
     <?php if (!empty($songs)): ?>
@@ -21,3 +26,5 @@
         </div>
     <?php endif; ?>
 </div>
+
+<script src="/assets/js/clean-titles.js"></script>

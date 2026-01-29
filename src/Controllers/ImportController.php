@@ -196,9 +196,9 @@ class ImportController
 
             // 6. Insertion en base de données
             // Nettoyer les titres et métadonnées
-            $cleanTitle = $this->cleanTitle($metadata['title'] ?? $spotifyTitle);
-            $cleanArtist = $this->cleanTitle($metadata['artist'] ?? $spotifyArtist);
-            $cleanAlbum = isset($metadata['album']) ? $this->cleanTitle($metadata['album']) : null;
+            $cleanTitle = Music::cleanTitle($metadata['title'] ?? $spotifyTitle);
+            $cleanArtist = Music::cleanTitle($metadata['artist'] ?? $spotifyArtist);
+            $cleanAlbum = isset($metadata['album']) ? Music::cleanTitle($metadata['album']) : null;
             
             $songId = $this->musicModel->create([
                 'title' => $cleanTitle,
@@ -235,43 +235,5 @@ class ImportController
                 'message' => $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Nettoie un titre en :
-     * 1. Décodant les entités HTML (&#201; → É)
-     * 2. Supprimant les parenthèses/crochets contenant "officiel", "official", "clip", "video", etc.
-     * 3. Nettoyant les espaces multiples
-     */
-    private function cleanTitle(string $title): string
-    {
-        // 1. Décoder les entités HTML
-        $title = html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        
-        // 2. Supprimer les parenthèses/crochets contenant des mots-clés
-        // Liste des mots-clés à détecter (insensible à la casse)
-        $keywords = [
-            'officiel', 'official', 'clip', 'video', 'audio', 'lyric', 'lyrics',
-            'visualizer', 'visualiser', 'vevo', 'hd', '4k', 'music video',
-            'official video', 'official audio', 'official music video',
-            'clip officiel', 'vidéo officielle'
-        ];
-        
-        // Pattern pour détecter (texte) ou [texte]
-        foreach ($keywords as $keyword) {
-            // Parenthèses
-            $title = preg_replace('/\s*\([^)]*' . preg_quote($keyword, '/') . '[^)]*\)/ui', '', $title);
-            // Crochets
-            $title = preg_replace('/\s*\[[^\]]*' . preg_quote($keyword, '/') . '[^\]]*\]/ui', '', $title);
-        }
-        
-        // 3. Nettoyer les espaces multiples et trim
-        $title = preg_replace('/\s+/', ' ', $title);
-        $title = trim($title);
-        
-        // 4. Nettoyer les tirets orphelins à la fin (ex: "Titre - ")
-        $title = preg_replace('/\s*[-–—]\s*$/', '', $title);
-        
-        return $title;
     }
 }

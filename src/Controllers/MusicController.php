@@ -308,4 +308,61 @@ class MusicController
             json(['success' => false, 'error' => 'Failed to delete song'], 500);
         }
     }
+
+    /**
+     * Clean all song titles in the database
+     * Removes HTML entities and unwanted keywords from titles, artists, and albums
+     */
+    public function cleanAllTitles(): void
+    {
+        csrf_verify();
+
+        try {
+            $songs = $this->musicModel->getAll();
+            $updated = 0;
+            $unchanged = 0;
+            $errors = 0;
+
+            foreach ($songs as $song) {
+                try {
+                    // Clean the fields
+                    $cleanTitle = Music::cleanTitle($song->title);
+                    $cleanArtist = Music::cleanTitle($song->artist);
+                    $cleanAlbum = Music::cleanTitle($song->album);
+
+                    // Check if anything changed
+                    $hasChanges = 
+                        $cleanTitle !== $song->title ||
+                        $cleanArtist !== $song->artist ||
+                        $cleanAlbum !== $song->album;
+
+                    if ($hasChanges) {
+                        $this->musicModel->update($song->id, [
+                            'title' => $cleanTitle,
+                            'artist' => $cleanArtist,
+                            'album' => $cleanAlbum
+                        ]);
+                        $updated++;
+                    } else {
+                        $unchanged++;
+                    }
+                } catch (\Exception $e) {
+                    error_log("Error cleaning song ID {$song->id}: " . $e->getMessage());
+                    $errors++;
+                }
+            }
+
+            json([
+                'success' => true,
+                'total' => count($songs),
+                'updated' => $updated,
+                'unchanged' => $unchanged,
+                'errors' => $errors
+            ]);
+
+        } catch (\Exception $e) {
+            error_log("Error in cleanAllTitles: " . $e->getMessage());
+            json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
 }
