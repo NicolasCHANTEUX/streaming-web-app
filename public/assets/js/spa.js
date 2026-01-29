@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Si ce n'est pas un lien, ou si c'est un téléchargement/lien externe, on ne fait rien
         if (!link || link.hasAttribute('download') || link.target === '_blank') return;
 
-        const url = link.href;
+        const url = link.href; 
         
         // Si c'est un lien interne à notre site
         if (url && url.startsWith(window.location.origin)) {
