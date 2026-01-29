@@ -55,7 +55,8 @@ window.closeModal = function() {
 window.showPlaylistModal = async function(songId) {
     try {
         const response = await fetch('/api/playlists');
-        const playlists = await response.json();
+        const data = await response.json();
+        const playlists = data.playlists || [];
         
         if (playlists.length === 0) {
             openModal(
@@ -125,11 +126,18 @@ window.showPlaylistModal = async function(songId) {
                         }
                         
                         try {
-                            const res = await fetch(`/playlists/${selectedPlaylistId}/add/${songId}`, {
-                                method: 'POST'
+                            const res = await fetch(`/api/playlists/${selectedPlaylistId}/add-song`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-CSRF-Token': getCsrfToken()
+                                },
+                                body: `song_id=${songId}`
                             });
                             
-                            if (res.ok) {
+                            const data = await res.json();
+                            
+                            if (data.success) {
                                 closeModal();
                                 showNotification('Titre ajouté à la playlist !', 'success');
                             } else {

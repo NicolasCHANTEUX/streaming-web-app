@@ -221,23 +221,33 @@ class Music
                 
                 if (isset($apicData['data'])) {
                     $imageData = $apicData['data'];
-                    $mimeType = $apicData['mime'] ?? 'image/jpeg';
                     
-                    // Déterminer l'extension selon le type MIME
-                    $extension = match($mimeType) {
-                        'image/png' => 'png',
-                        'image/jpeg', 'image/jpg' => 'jpg',
-                        default => 'jpg'
-                    };
+                    // Créer une image depuis les données
+                    $image = imagecreatefromstring($imageData);
+                    if ($image === false) {
+                        error_log("Failed to create image from APIC data");
+                        return null;
+                    }
                     
-                    // Générer un nom de fichier unique basé sur le hash du fichier
-                    $coverFilename = md5($filePath) . '.' . $extension;
+                    // Optimiser et redimensionner l'image
+                    $optimizedImage = $this->optimizeImage($image);
+                    imagedestroy($image);
+                    
+                    if ($optimizedImage === null) {
+                        return null;
+                    }
+                    
+                    // Générer un nom de fichier unique en WebP
+                    $coverFilename = md5($filePath) . '.webp';
                     $coverPath = config('paths.root') . '/public/assets/images/covers/' . $coverFilename;
                     
-                    // Sauvegarder l'image
-                    if (file_put_contents($coverPath, $imageData)) {
+                    // Sauvegarder en WebP avec qualité optimisée
+                    if (imagewebp($optimizedImage, $coverPath, 85)) {
+                        imagedestroy($optimizedImage);
                         return '/assets/images/covers/' . $coverFilename;
                     }
+                    
+                    imagedestroy($optimizedImage);
                 }
             }
             
@@ -245,6 +255,56 @@ class Music
             
         } catch (\Exception $e) {
             error_log("Cover extraction error for {$filePath}: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Optimize and resize an image to a maximum size
+     * @param resource $image GD image resource
+     * @param int $maxSize Maximum width/height in pixels
+     * @return resource|null Optimized image or null on failure
+     */
+    private function optimizeImage($image, int $maxSize = 300)
+    {
+        try {
+            $width = imagesx($image);
+            $height = imagesy($image);
+            
+            // Calculer les nouvelles dimensions en conservant le ratio
+            if ($width > $maxSize || $height > $maxSize) {
+                if ($width > $height) {
+                    $newWidth = $maxSize;
+                    $newHeight = (int)($height * ($maxSize / $width));
+                } else {
+                    $newHeight = $maxSize;
+                    $newWidth = (int)($width * ($maxSize / $height));
+                }
+            } else {
+                // L'image est déjà assez petite
+                $newWidth = $width;
+                $newHeight = $height;
+            }
+            
+            // Créer une nouvelle image redimensionnée
+            $optimized = imagecreatetruecolor($newWidth, $newHeight);
+            
+            // Préserver la transparence pour PNG
+            imagealphablending($optimized, false);
+            imagesavealpha($optimized, true);
+            
+            // Redimensionner avec interpolation de haute qualité
+            imagecopyresampled(
+                $optimized, $image,
+                0, 0, 0, 0,
+                $newWidth, $newHeight,
+                $width, $height
+            );
+            
+            return $optimized;
+            
+        } catch (\Exception $e) {
+            error_log("Image optimization error: " . $e->getMessage());
             return null;
         }
     }

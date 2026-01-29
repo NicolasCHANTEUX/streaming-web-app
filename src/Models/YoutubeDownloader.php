@@ -120,6 +120,8 @@ class YoutubeDownloader
         // --convert-thumbnails jpg convertit en JPG pour compatibilité web
         // --cookies-from-browser chrome utilise les cookies du navigateur pour éviter les erreurs bot
         // Ajouter des options pour éviter les erreurs 403 de YouTube
+        
+        // Essayer d'abord avec les cookies Chrome
         $cmd = "{$this->ytdlpPath} {$this->ffmpegOption} -x --audio-format mp3 --audio-quality 0 " .
                "--embed-thumbnail --add-metadata " .
                "--write-thumbnail --convert-thumbnails jpg " .
@@ -128,9 +130,30 @@ class YoutubeDownloader
                "--output {$outputArg} {$urlArg} 2>&1";
 
         // Log de la commande pour debug
-        error_log("Executing yt-dlp command: " . $cmd);
+        error_log("Executing yt-dlp command (with cookies): " . $cmd);
 
         exec($cmd, $output, $returnCode);
+
+        // Si échec à cause des cookies Chrome (navigateur ouvert), réessayer sans cookies
+        if ($returnCode !== 0) {
+            $errorMsg = implode("\n", $output);
+            
+            if (stripos($errorMsg, 'Could not copy Chrome cookie database') !== false) {
+                error_log("Chrome cookies unavailable, retrying without cookies...");
+                
+                // Réessayer sans --cookies-from-browser
+                $cmdNoCookies = "{$this->ytdlpPath} {$this->ffmpegOption} -x --audio-format mp3 --audio-quality 0 " .
+                       "--embed-thumbnail --add-metadata " .
+                       "--write-thumbnail --convert-thumbnails jpg " .
+                       "--extractor-args \"youtube:player_client=android\" " .
+                       "--output {$outputArg} {$urlArg} 2>&1";
+                
+                error_log("Executing yt-dlp command (without cookies): " . $cmdNoCookies);
+                
+                $output = []; // Reset output array
+                exec($cmdNoCookies, $output, $returnCode);
+            }
+        }
 
         // Log du résultat
         error_log("yt-dlp return code: {$returnCode}");
@@ -149,17 +172,44 @@ class YoutubeDownloader
             return ['success' => false, 'error' => 'File not found after download'];
         }
 
-        // Trouver et déplacer la thumbnail vers le dossier covers
+        // Trouver et optimiser la thumbnail vers le dossier covers
         $coverPath = null;
         $baseFilename = pathinfo($downloadedFile, PATHINFO_FILENAME);
         $thumbnailFile = $this->musicPath . '/' . $baseFilename . '.jpg';
         
         if (file_exists($thumbnailFile)) {
-            $coverFilename = md5($videoId) . '.jpg';
-            $coverDestination = config('paths.root') . '/public/assets/images/covers/' . $coverFilename;
-            
-            if (rename($thumbnailFile, $coverDestination)) {
-                $coverPath = '/assets/images/covers/' . $coverFilename;
+            try {
+                // Charger l'image
+                $image = imagecreatefromjpeg($thumbnailFile);
+                if ($image !== false) {
+                    // Optimiser l'image (300x300 max)
+                    $optimized = $this->optimizeImage($image, 300);
+                    imagedestroy($image);
+                    
+                    if ($optimized !== null) {
+                        // Sauvegarder en WebP
+                        $coverFilename = md5($videoId) . '.webp';
+                        $coverDestination = config('paths.root') . '/public/assets/images/covers/' . $coverFilename;
+                        
+                        if (imagewebp($optimized, $coverDestination, 85)) {
+                            $coverPath = '/assets/images/covers/' . $coverFilename;
+                        }
+                        
+                        imagedestroy($optimized);
+                    }
+                }
+                
+                // Supprimer le fichier JPEG original
+                @unlink($thumbnailFile);
+                
+            } catch (\Exception $e) {
+                error_log("Thumbnail optimization error: " . $e->getMessage());
+                // Fallback: copier le JPEG tel quel
+                $coverFilename = md5($videoId) . '.jpg';
+                $coverDestination = config('paths.root') . '/public/assets/images/covers/' . $coverFilename;
+                if (rename($thumbnailFile, $coverDestination)) {
+                    $coverPath = '/assets/images/covers/' . $coverFilename;
+                }
             }
         }
 
@@ -169,6 +219,56 @@ class YoutubeDownloader
             'youtube_id' => $videoId,
             'cover_path' => $coverPath
         ];
+    }
+
+    /**
+     * Optimize and resize an image to a maximum size
+     * @param resource $image GD image resource
+     * @param int $maxSize Maximum width/height in pixels
+     * @return resource|null Optimized image or null on failure
+     */
+    private function optimizeImage($image, int $maxSize = 300)
+    {
+        try {
+            $width = imagesx($image);
+            $height = imagesy($image);
+            
+            // Calculer les nouvelles dimensions en conservant le ratio
+            if ($width > $maxSize || $height > $maxSize) {
+                if ($width > $height) {
+                    $newWidth = $maxSize;
+                    $newHeight = (int)($height * ($maxSize / $width));
+                } else {
+                    $newHeight = $maxSize;
+                    $newWidth = (int)($width * ($maxSize / $height));
+                }
+            } else {
+                // L'image est déjà assez petite
+                $newWidth = $width;
+                $newHeight = $height;
+            }
+            
+            // Créer une nouvelle image redimensionnée
+            $optimized = imagecreatetruecolor($newWidth, $newHeight);
+            
+            // Préserver la transparence
+            imagealphablending($optimized, false);
+            imagesavealpha($optimized, true);
+            
+            // Redimensionner avec interpolation de haute qualité
+            imagecopyresampled(
+                $optimized, $image,
+                0, 0, 0, 0,
+                $newWidth, $newHeight,
+                $width, $height
+            );
+            
+            return $optimized;
+            
+        } catch (\Exception $e) {
+            error_log("Image optimization error: " . $e->getMessage());
+            return null;
+        }
     }
 
     /**

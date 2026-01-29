@@ -51,7 +51,10 @@
             <i class="far fa-heart text-base"></i>
         </button>
         <button class="text-text-sub hover:text-text-main p-2 transition-colors rounded-full hover:bg-bg-surface" 
-                onclick="showSongOptions(<?= e($track->id) ?>, '<?= e($track->title) ?>', '<?= e($track->artist ?? '') ?>')" 
+                data-song-id="<?= e($track->id) ?>"
+                data-song-title="<?= htmlspecialchars($track->title, ENT_QUOTES, 'UTF-8') ?>"
+                data-song-artist="<?= htmlspecialchars($track->artist ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                onclick="showSongOptions(this.dataset.songId, this.dataset.songTitle, this.dataset.songArtist)" 
                 title="Plus d'options">
             <i class="fas fa-ellipsis-v text-base"></i>
         </button>
