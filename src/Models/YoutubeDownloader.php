@@ -138,7 +138,23 @@ class YoutubeDownloader
         if ($returnCode !== 0) {
             $errorMsg = implode("\n", $output);
             
-            if (stripos($errorMsg, 'Could not copy Chrome cookie database') !== false) {
+            // Vérifier si l'erreur est liée aux cookies Chrome
+            $cookieErrors = [
+                'Could not copy Chrome cookie database',
+                'could not find chrome cookies database',
+                'ERROR: could not find chrome cookies',
+                'Extracting cookies from chrome ERROR'
+            ];
+            
+            $isCookieError = false;
+            foreach ($cookieErrors as $pattern) {
+                if (stripos($errorMsg, $pattern) !== false) {
+                    $isCookieError = true;
+                    break;
+                }
+            }
+            
+            if ($isCookieError) {
                 error_log("Chrome cookies unavailable, retrying without cookies...");
                 
                 // Réessayer sans --cookies-from-browser
