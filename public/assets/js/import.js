@@ -280,8 +280,9 @@ async function processImportQueue() {
             updateStats();
         }
 
-        // Small delay to avoid overwhelming the server
-        await sleep(500);
+        // Delay between requests to avoid rate limiting and bot detection
+        // 2 seconds is safer than 500ms for mass imports
+        await sleep(2000);
     }
 }
 
@@ -320,6 +321,10 @@ async function processImportTrack(track) {
             } else if (result.status === 'no_results') {
                 log(`  ⚠️ Aucun résultat YouTube`, 'text-yellow-500');
                 stats.no_results++;
+            } else if (result.status === 'bot_detected') {
+                log(`  🤖 Bot détecté: ${result.message}`, 'text-orange-500');
+                log(`  💡 Conseil: Ralentissez l'import ou attendez quelques minutes`, 'text-blue-400');
+                stats.errors++;
             } else {
                 log(`  ❌ Erreur: ${result.message}`, 'text-red-500');
                 stats.errors++;

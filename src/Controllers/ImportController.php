@@ -123,17 +123,48 @@ class ImportController
                 return;
             }
 
-            // 4. Téléchargement de la vidéo
+            // 4. Téléchargement de la vidéo avec retry en cas d'erreur bot
             error_log("IMPORT: Starting download for video ID: {$foundVideo['id']}");
             
-            $downloadResult = $this->downloader->download($foundVideo['id'], "$spotifyArtist - $spotifyTitle");
+            $maxRetries = 2;
+            $downloadResult = null;
+            $lastError = null;
+            
+            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                if ($attempt > 1) {
+                    // Attendre 5 secondes avant de réessayer
+                    error_log("IMPORT: Retry attempt {$attempt} after 5 seconds delay...");
+                    sleep(5);
+                }
+                
+                $downloadResult = $this->downloader->download($foundVideo['id'], "$spotifyArtist - $spotifyTitle");
+                
+                if ($downloadResult['success']) {
+                    break; // Succès, on sort de la boucle
+                }
+                
+                $lastError = $downloadResult['error'] ?? 'Unknown error';
+                error_log("IMPORT: Download attempt {$attempt} failed: {$lastError}");
+                
+                // Si c'est une erreur bot et qu'on a encore des tentatives, on réessaye
+                if (stripos($lastError, 'bot') === false && stripos($lastError, 'cookies') === false) {
+                    // Ce n'est pas une erreur bot, pas la peine de réessayer
+                    break;
+                }
+            }
 
             if (!$downloadResult['success']) {
-                error_log("IMPORT: Download failed: " . ($downloadResult['error'] ?? 'Unknown error'));
+                error_log("IMPORT: Download failed after {$maxRetries} attempts: {$lastError}");
+                
+                // Déterminer si c'est une erreur bot pour un message plus clair
+                $isBotError = stripos($lastError, 'bot') !== false || stripos($lastError, 'cookies') !== false;
+                
                 json([
                     'success' => false,
-                    'status' => 'download_failed',
-                    'message' => $downloadResult['error'] ?? 'Échec du téléchargement',
+                    'status' => $isBotError ? 'bot_detected' : 'download_failed',
+                    'message' => $isBotError 
+                        ? 'YouTube détecte un bot (trop de requêtes). Attendez quelques minutes.' 
+                        : ($lastError ?? 'Échec du téléchargement'),
                     'video' => $foundVideo['title']
                 ]);
                 return;
@@ -164,10 +195,15 @@ class ImportController
             }
 
             // 6. Insertion en base de données
+            // Nettoyer les titres et métadonnées
+            $cleanTitle = $this->cleanTitle($metadata['title'] ?? $spotifyTitle);
+            $cleanArtist = $this->cleanTitle($metadata['artist'] ?? $spotifyArtist);
+            $cleanAlbum = isset($metadata['album']) ? $this->cleanTitle($metadata['album']) : null;
+            
             $songId = $this->musicModel->create([
-                'title' => $metadata['title'] ?? $spotifyTitle,
-                'artist' => $metadata['artist'] ?? $spotifyArtist,
-                'album' => $metadata['album'] ?? null,
+                'title' => $cleanTitle,
+                'artist' => $cleanArtist,
+                'album' => $cleanAlbum,
                 'duration' => $metadata['duration'] ?? $foundVideo['duration'] ?? 0,
                 'file_path' => $normalizedFilePath,
                 'cover_path' => $normalizedCoverPath,
@@ -183,8 +219,8 @@ class ImportController
                 'video' => $foundVideo['title'],
                 'song_id' => $songId,
                 'metadata' => [
-                    'title' => $metadata['title'] ?? $spotifyTitle,
-                    'artist' => $metadata['artist'] ?? $spotifyArtist,
+                    'title' => $cleanTitle,
+                    'artist' => $cleanArtist,
                     'duration' => $metadata['duration'] ?? 0
                 ]
             ]);
@@ -199,5 +235,43 @@ class ImportController
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Nettoie un titre en :
+     * 1. Décodant les entités HTML (&#201; → É)
+     * 2. Supprimant les parenthèses/crochets contenant "officiel", "official", "clip", "video", etc.
+     * 3. Nettoyant les espaces multiples
+     */
+    private function cleanTitle(string $title): string
+    {
+        // 1. Décoder les entités HTML
+        $title = html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        // 2. Supprimer les parenthèses/crochets contenant des mots-clés
+        // Liste des mots-clés à détecter (insensible à la casse)
+        $keywords = [
+            'officiel', 'official', 'clip', 'video', 'audio', 'lyric', 'lyrics',
+            'visualizer', 'visualiser', 'vevo', 'hd', '4k', 'music video',
+            'official video', 'official audio', 'official music video',
+            'clip officiel', 'vidéo officielle'
+        ];
+        
+        // Pattern pour détecter (texte) ou [texte]
+        foreach ($keywords as $keyword) {
+            // Parenthèses
+            $title = preg_replace('/\s*\([^)]*' . preg_quote($keyword, '/') . '[^)]*\)/ui', '', $title);
+            // Crochets
+            $title = preg_replace('/\s*\[[^\]]*' . preg_quote($keyword, '/') . '[^\]]*\]/ui', '', $title);
+        }
+        
+        // 3. Nettoyer les espaces multiples et trim
+        $title = preg_replace('/\s+/', ' ', $title);
+        $title = trim($title);
+        
+        // 4. Nettoyer les tirets orphelins à la fin (ex: "Titre - ")
+        $title = preg_replace('/\s*[-–—]\s*$/', '', $title);
+        
+        return $title;
     }
 }

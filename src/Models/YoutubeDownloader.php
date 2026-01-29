@@ -118,10 +118,12 @@ class YoutubeDownloader
         // Command to download audio only in MP3 format
         // --write-thumbnail sauvegarde aussi l'image séparément
         // --convert-thumbnails jpg convertit en JPG pour compatibilité web
+        // --cookies-from-browser chrome utilise les cookies du navigateur pour éviter les erreurs bot
         // Ajouter des options pour éviter les erreurs 403 de YouTube
         $cmd = "{$this->ytdlpPath} {$this->ffmpegOption} -x --audio-format mp3 --audio-quality 0 " .
                "--embed-thumbnail --add-metadata " .
                "--write-thumbnail --convert-thumbnails jpg " .
+               "--cookies-from-browser chrome " .
                "--extractor-args \"youtube:player_client=android\" " .
                "--output {$outputArg} {$urlArg} 2>&1";
 
