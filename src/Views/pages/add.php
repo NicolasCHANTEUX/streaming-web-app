@@ -4,6 +4,32 @@
         <p class="text-text-sub">Téléchargez depuis YouTube ou importez depuis Spotify</p>
     </div>
 
+    <!-- Import In Progress Alert -->
+    <div id="importInProgressAlert" class="hidden mb-6 bg-orange-500/10 border-2 border-orange-500/50 rounded-xl p-5">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
+                <i class="fas fa-download text-orange-500 text-xl animate-pulse"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-lg font-bold text-orange-500 mb-1 flex items-center gap-2">
+                    Importation en cours
+                    <span class="text-sm font-normal text-text-sub" id="importProgressSummary"></span>
+                </h3>
+                <p class="text-text-sub text-sm mb-3">Une importation CSV est actuellement en cours. Cliquez ci-dessous pour voir les détails ou l'arrêter.</p>
+                <div class="flex gap-3">
+                    <button onclick="resumeImportView()" class="px-4 py-2 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 transition-colors inline-flex items-center gap-2">
+                        <i class="fas fa-eye"></i>
+                        Voir la progression
+                    </button>
+                    <button onclick="stopImportFromAlert()" class="px-4 py-2 rounded-lg border-2 border-red-500/50 text-red-500 font-semibold hover:bg-red-500/10 transition-colors inline-flex items-center gap-2">
+                        <i class="fas fa-stop"></i>
+                        Arrêter l'importation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tabs -->
     <div class="flex gap-4 mb-8 border-b border-border-main">
         <button 
@@ -224,6 +250,72 @@
 <script src="/assets/js/import.js?v=<?= time() ?>"></script>
 
 <script>
+// Check for ongoing import on page load
+document.addEventListener('DOMContentLoaded', () => {
+    checkOngoingImport();
+});
+
+function checkOngoingImport() {
+    const importState = localStorage.getItem('importState');
+    
+    if (importState) {
+        const state = JSON.parse(importState);
+        
+        // Check if import was active recently (within last 5 minutes)
+        const lastUpdate = new Date(state.lastUpdate);
+        const now = new Date();
+        const minutesSinceUpdate = (now - lastUpdate) / (1000 * 60);
+        
+        if (state.isActive && minutesSinceUpdate < 5) {
+            // Show alert
+            const alert = document.getElementById('importInProgressAlert');
+            const summary = document.getElementById('importProgressSummary');
+            
+            summary.textContent = `(${state.current}/${state.total})`;
+            alert.classList.remove('hidden');
+            
+            // Auto-switch to Spotify tab
+            switchTab('spotify');
+        } else if (!state.isActive || minutesSinceUpdate >= 5) {
+            // Clear old state
+            localStorage.removeItem('importState');
+        }
+    }
+}
+
+function resumeImportView() {
+    // Switch to Spotify tab
+    switchTab('spotify');
+    
+    // Show progress sections
+    document.getElementById('progressSection')?.classList.remove('hidden');
+    document.getElementById('statsSection')?.classList.remove('hidden');
+    document.getElementById('importLogsSection')?.classList.remove('hidden');
+    
+    // Hide alert
+    document.getElementById('importInProgressAlert').classList.add('hidden');
+    
+    // Scroll to progress
+    setTimeout(() => {
+        document.getElementById('progressSection')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+}
+
+function stopImportFromAlert() {
+    if (confirm('Voulez-vous vraiment arrêter l\'importation en cours ?')) {
+        // Cancel import via import.js
+        if (typeof cancelImport === 'function') {
+            cancelImport();
+        }
+        
+        // Clear state
+        localStorage.removeItem('importState');
+        
+        // Hide alert
+        document.getElementById('importInProgressAlert').classList.add('hidden');
+    }
+}
+
 function switchTab(tab) {
     // Update tab buttons
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));

@@ -11,6 +11,13 @@ let currentIndex = 0;
 let isImporting = false;
 let isCancelled = false;
 
+// Delay management for bot detection
+let currentDelay = 3000; // Start with 3 seconds (safer than 2s)
+let botDetectionCount = 0;
+const MIN_DELAY = 3000; // Minimum 3 seconds
+const MAX_DELAY = 30000; // Maximum 30 seconds
+const DELAY_INCREMENT = 5000; // Add 5 seconds each time bot is detected
+
 // Statistics
 let stats = {
     downloaded: 0,
@@ -179,6 +186,13 @@ async function startImport() {
         return;
     }
 
+    // Reset delay settings for new import
+    currentDelay = MIN_DELAY;
+    botDetectionCount = 0;
+    
+    // Save initial import state
+    saveImportState(true, 0, importQueue.length);
+
     isImporting = true;
     isCancelled = false;
     currentIndex = 0;
@@ -221,6 +235,9 @@ async function startImport() {
     document.getElementById('cancelImportBtn').classList.add('hidden');
     document.getElementById('startImportBtn').classList.remove('hidden');
     document.getElementById('startImportBtn').innerHTML = '<i class="fas fa-redo"></i> Recommencer';
+    
+    // Clear import state from localStorage
+    clearImportState();
     
     if (isCancelled) {
         log('⚠️ Importation annulée par l\'utilisateur', 'text-yellow-500');
@@ -268,6 +285,9 @@ async function processImportQueue() {
             <span class="text-text-sub mx-2">—</span>
             <span class="text-text-main">${track.title}</span>
         `;
+        
+        // Save progress to localStorage
+        saveImportState(true, currentIndex, importQueue.length);
 
         log(`[${currentIndex}/${importQueue.length}] Traitement: ${track.artist} - ${track.title}`, 'text-gray-400');
 
@@ -280,9 +300,11 @@ async function processImportQueue() {
             updateStats();
         }
 
-        // Delay between requests to avoid rate limiting and bot detection
-        // 2 seconds is safer than 500ms for mass imports
-        await sleep(2000);
+        // Adaptive delay between requests
+        // Increases automatically when bot is detected
+        const delaySeconds = (currentDelay / 1000).toFixed(1);
+        log(`⏱️ Attente de ${delaySeconds}s avant la prochaine requête...`, 'text-gray-500');
+        await sleep(currentDelay);
     }
 }
 
@@ -310,6 +332,11 @@ async function processImportTrack(track) {
             if (result.status === 'downloaded') {
                 log(`  ✅ Téléchargé: ${result.video}`, 'text-green-500');
                 stats.downloaded++;
+                
+                // Gradually reduce delay on successful downloads (but never below minimum)
+                if (currentDelay > MIN_DELAY && botDetectionCount === 0) {
+                    currentDelay = Math.max(currentDelay - 500, MIN_DELAY);
+                }
             } else if (result.status === 'already_exists') {
                 log(`  ℹ️ Déjà dans la bibliothèque`, 'text-blue-500');
                 stats.already_exists++;
@@ -323,8 +350,20 @@ async function processImportTrack(track) {
                 stats.no_results++;
             } else if (result.status === 'bot_detected') {
                 log(`  🤖 Bot détecté: ${result.message}`, 'text-orange-500');
-                log(`  💡 Conseil: Ralentissez l'import ou attendez quelques minutes`, 'text-blue-400');
+                
+                // Increase delay to avoid further bot detection
+                botDetectionCount++;
+                const oldDelay = currentDelay;
+                currentDelay = Math.min(currentDelay + DELAY_INCREMENT, MAX_DELAY);
+                
+                log(`  ⏱️ Délai augmenté: ${oldDelay/1000}s → ${currentDelay/1000}s`, 'text-purple-400');
+                log(`  💡 Conseil: Attendez ou réessayez plus tard avec moins de titres`, 'text-blue-400');
+                
                 stats.errors++;
+                
+                // Wait longer immediately after bot detection
+                log(`  ⏸️ Pause de ${currentDelay/1000} secondes...`, 'text-yellow-400');
+                await sleep(currentDelay);
             } else {
                 log(`  ❌ Erreur: ${result.message}`, 'text-red-500');
                 stats.errors++;
@@ -358,6 +397,9 @@ function cancelImport() {
     if (confirm('Voulez-vous vraiment annuler l\'importation en cours ?')) {
         isCancelled = true;
         log('⏸️ Annulation en cours...', 'text-yellow-500');
+        
+        // Clear import state
+        clearImportState();
     }
 }
 
@@ -459,4 +501,32 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initDragAndDrop);
 } else {
     initDragAndDrop();
+}
+
+/**
+ * Save import state to localStorage
+ */
+function saveImportState(isActive, current, total) {
+    try {
+        const state = {
+            isActive: isActive,
+            current: current,
+            total: total,
+            lastUpdate: new Date().toISOString()
+        };
+        localStorage.setItem('importState', JSON.stringify(state));
+    } catch (error) {
+        console.error('Error saving import state:', error);
+    }
+}
+
+/**
+ * Clear import state from localStorage
+ */
+function clearImportState() {
+    try {
+        localStorage.removeItem('importState');
+    } catch (error) {
+        console.error('Error clearing import state:', error);
+    }
 }
