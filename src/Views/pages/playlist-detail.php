@@ -122,8 +122,11 @@ const playlistId = <?= e($playlist->id) ?>;
 function playAll() {
     const songElements = document.querySelectorAll('[data-song-id]');
     if (songElements.length > 0) {
-            const songIds = Array.from(songElements).map(el => parseInt(el.dataset.songId));
-            Player.playQueue(songIds, 0);
+        const songIds = Array.from(songElements).map(el => parseInt(el.dataset.songId));
+        Player.playQueue(songIds, 0);
+    }
+}
+
 // Shuffle and play
 function shuffleAll() {
     const songElements = Array.from(document.querySelectorAll('div.group[data-song-id]'));
