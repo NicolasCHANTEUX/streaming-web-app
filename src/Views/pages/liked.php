@@ -31,9 +31,6 @@
                     <i class="fas fa-shuffle"></i>
                     Aléatoire
                 </button>
-                <button onclick="downloadAll()" class="p-4 rounded-full border-2 border-text-main/20 text-text-sub hover:text-text-main hover:border-text-main/40 transition-all" title="Télécharger tout">
-                    <i class="fas fa-download"></i>
-                </button>
             </div>
             <?php endif; ?>
         </div>
@@ -108,24 +105,24 @@
 <script>
 // Play all songs in order
 function playAll() {
-    const songElements = document.querySelectorAll('[data-song-id]');
+    const songElements = document.querySelectorAll('div.group[data-song-id]');
     if (songElements.length > 0) {
-        const firstSongId = songElements[0].dataset.songId;
-        Player.play(parseInt(firstSongId));
+        const songIds = Array.from(songElements).map(el => parseInt(el.dataset.songId));
+        Player.playQueue(songIds, 0);
     }
 }
 
 // Shuffle and play
 function shuffleAll() {
-    const songElements = Array.from(document.querySelectorAll('[data-song-id]'));
+    const songElements = Array.from(document.querySelectorAll('div.group[data-song-id]'));
     if (songElements.length > 0) {
         // Shuffle array
         for (let i = songElements.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [songElements[i], songElements[j]] = [songElements[j], songElements[i]];
         }
-        const firstSongId = songElements[0].dataset.songId;
-        Player.play(parseInt(firstSongId));
+        const songIds = songElements.map(el => parseInt(el.dataset.songId));
+        Player.playQueue(songIds, 0);
     }
 }
 
