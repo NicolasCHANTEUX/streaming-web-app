@@ -302,6 +302,11 @@ function playTrack(songId) {
     Player.play(songId);
 }
 
+// Alias pour compatibilité avec les anciennes vues
+function playMusic(songId) {
+    Player.play(songId);
+}
+
 function playQueue(songIds, startIndex = 0) {
     Player.playQueue(songIds, startIndex);
 }

@@ -7,7 +7,7 @@ const urlsToCache = [
     '/assets/css/components.css',
     '/assets/js/app.js',
     '/assets/js/player.js',
-    '/assets/images/default-cover.png'
+    '/assets/images/default-cover.svg'
 ];
 
 // Install event

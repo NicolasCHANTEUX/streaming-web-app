@@ -3,24 +3,35 @@
 $musicIndex = isset($index) ? $index + 1 : 1;
 
 // Fonction helper pour accéder aux propriétés objet ou tableau
-function getMusicProp($music, $prop, $default = null) {
-    if (is_object($music)) {
-        return $music->$prop ?? $default;
+if (!function_exists('getMusicProp')) {
+    function getMusicProp($music, $prop, $default = null) {
+        if (is_object($music)) {
+            return $music->$prop ?? $default;
+        }
+        return $music[$prop] ?? $default;
     }
-    return $music[$prop] ?? $default;
 }
 
 $musicId = getMusicProp($music, 'id', 0);
 $musicTitle = htmlspecialchars(getMusicProp($music, 'title', 'Titre inconnu'));
 $musicArtist = htmlspecialchars(getMusicProp($music, 'artist', 'Artiste inconnu'));
 $coverPath = getMusicProp($music, 'cover_path', '');
-// On gère l'image par défaut si pas de cover
-$musicCover = !empty($coverPath) ? '/assets/images/covers/' . $coverPath : '/assets/images/default-cover.svg';
+
+// On gère l'image : si le chemin contient déjà /assets/, on le garde tel quel
+if (!empty($coverPath)) {
+    if (strpos($coverPath, '/assets/') === 0 || strpos($coverPath, 'http') === 0) {
+        $musicCover = $coverPath; // Chemin déjà complet
+    } else {
+        $musicCover = '/assets/images/covers/' . basename($coverPath); // Juste le nom de fichier
+    }
+} else {
+    $musicCover = '/assets/images/default-cover.svg';
+}
 
 // Échappement pour les fonctions JS (play, options...)
 $jsTitle = addslashes(getMusicProp($music, 'title', ''));
 $jsArtist = addslashes(getMusicProp($music, 'artist', ''));
-$jsCover = addslashes($coverPath);
+$jsCover = addslashes($musicCover);
 ?>
 
 <div class="group relative flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all mb-2 music-row">
