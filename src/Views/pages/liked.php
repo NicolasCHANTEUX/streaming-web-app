@@ -1,86 +1,140 @@
-<div class="space-y-4 pb-24 pt-4"> <?php
-    // Logique pour récupérer l'image de la première musique likée
-    $playlistCover = '/assets/images/default-cover.svg';
-    if (!empty($likes) && !empty($likes[0]['cover_path'])) {
-        $playlistCover = '/assets/images/covers/' . $likes[0]['cover_path'];
-    }
-    ?>
-
-    <div class="relative bg-gradient-to-b from-purple-900/40 to-bg-main p-4 md:p-6 rounded-xl border border-white/5 shadow-lg">
-        <div class="flex flex-row gap-4 items-center md:items-end">
+<div class="pb-8">
+    <!-- Header avec gradient et bannière -->
+    <div class="relative mb-8 pb-8 pt-12 px-6 rounded-xl overflow-hidden">
+        <!-- Gradient background -->
+        <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-600/10 to-transparent"></div>
+        
+        <!-- Content -->
+        <div class="relative z-10">
+            <div class="flex items-end gap-6 mb-8">
+                <!-- Icon -->
+                <div class="w-28 h-28 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-2xl flex-shrink-0">
+                    <i class="fas fa-heart text-5xl text-white"></i>
+                </div>
+                
+                <!-- Info -->
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-text-sub mb-2 uppercase tracking-wide">Playlist</p>
+                    <h1 class="text-5xl md:text-6xl font-black mb-4 text-text-main leading-tight">Titres Likés</h1>
+                    <p class="text-text-sub text-base">Tous les titres que j'aime • <span class="font-semibold text-text-main"><?= count($songs) ?></span> titre<?= count($songs) > 1 ? 's' : '' ?></p>
+                </div>
+            </div>
             
-            <div class="shrink-0">
-                <div class="w-28 h-28 md:w-48 md:h-48 rounded-lg overflow-hidden shadow-xl border border-white/10 relative group">
-                    <img src="<?= htmlspecialchars($playlistCover) ?>" 
-                         alt="Titres Likés" 
-                         class="w-full h-full object-cover">
-                    <div class="absolute bottom-2 right-2 bg-primary p-2 rounded-full shadow-md">
-                        <i class="fas fa-heart text-white text-sm md:text-xl"></i>
-                    </div>
-                </div>
+            <?php if (!empty($songs)): ?>
+            <!-- Actions principales -->
+            <div class="flex items-center gap-4">
+                <button onclick="playAll()" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
+                    <i class="fas fa-play text-sm"></i>
+                    Tout lire
+                </button>
+                <button onclick="shuffleAll()" class="inline-flex items-center gap-3 px-6 py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
+                    <i class="fas fa-shuffle"></i>
+                    Aléatoire
+                </button>
             </div>
-
-            <div class="flex-1 min-w-0 flex flex-col justify-center gap-2 md:gap-4">
-                <div>
-                    <h5 class="text-xs font-bold uppercase tracking-widest text-text-sub hidden md:block">Playlist</h5>
-                    <h1 class="text-2xl md:text-5xl font-black text-white tracking-tight truncate drop-shadow-lg">
-                        Titres Likés
-                    </h1>
-                    <p class="text-text-sub text-xs md:text-sm font-medium mt-1">
-                        <?= isset($likes) ? count($likes) : 0 ?> titres
-                    </p>
-                </div>
-
-                <div class="flex items-center gap-3 mt-1">
-                    <?php if (!empty($likes)): ?>
-                        <?php 
-                            $allIds = array_column($likes, 'music_id'); 
-                            $jsonIds = htmlspecialchars(json_encode($allIds));
-                        ?>
-                        
-                        <button onclick='playQueue(<?= $jsonIds ?>, 0)' 
-                                class="bg-primary hover:bg-primary-dark text-white rounded-full w-10 h-10 md:px-6 md:w-auto md:h-12 font-bold flex items-center justify-center gap-2 transition-all shadow-lg hover:scale-105">
-                            <i class="fas fa-play text-sm md:text-lg ml-0.5"></i>
-                            <span class="hidden md:inline">LECTURE</span>
-                        </button>
-
-                        <button onclick='playQueue(<?= $jsonIds ?>, 0, true)' 
-                                class="bg-white/10 hover:bg-white/20 text-white rounded-full w-10 h-10 md:px-6 md:w-auto md:h-12 font-bold flex items-center justify-center gap-2 transition-all hover:scale-105">
-                            <i class="fas fa-random text-sm md:text-lg"></i>
-                            <span class="hidden md:inline">ALÉATOIRE</span>
-                        </button>
-                    <?php endif; ?>
-                </div>
-            </div>
+            <?php endif; ?>
         </div>
     </div>
 
-    <div class="bg-bg-card/20 rounded-xl p-2 md:p-4 border border-white/5 min-h-[300px]">
-        
-        <?php if (empty($likes)): ?>
-            <div class="flex flex-col items-center justify-center py-12 text-text-sub space-y-3">
-                <i class="fas fa-heart-broken text-3xl opacity-50"></i>
-                <p class="text-base font-medium">Aucun titre liké</p>
+    <?php if (empty($songs)): ?>
+        <!-- État vide avec design émotionnel -->
+        <div class="text-center py-20 px-6">
+            <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center">
+                <i class="far fa-heart text-6xl text-text-sub"></i>
             </div>
-        <?php else: ?>
+            <h2 class="text-2xl font-bold text-text-main mb-3">Aucun titre liké pour le moment</h2>
+            <p class="text-text-sub text-base max-w-md mx-auto mb-8">Commencez à construire votre collection en likant vos musiques préférées !</p>
+            <a href="/music" class="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-semibold rounded-full hover:scale-105 transition-transform shadow-lg">
+                <i class="fas fa-compass"></i>
+                Explorer la bibliothèque
+            </a>
+        </div>
+    <?php elseif (count($songs) <= 3): ?>
+        <!-- Playlist courte avec suggestion -->
+        <div class="px-4">
+            <div class="mb-6">
+                <h2 class="text-lg font-bold text-text-main mb-3 flex items-center gap-2">
+                    <i class="fas fa-music text-primary"></i>
+                    Vos titres
+                </h2>
+                <div class="space-y-0.5">
+                    <?php foreach ($songs as $index => $song): ?>
+                        <?php component('music-card', ['track' => $song, 'index' => $index + 1, 'showIndex' => true]); ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
             
-            <div class="space-y-1">
-                <?php foreach ($likes as $index => $like): ?>
-                    <?php 
-                        // Préparation explicite des variables pour la carte
-                        // Note : on passe $like directement comme $music pour éviter les confusions
-                        $music = $like; 
-                        // Si ton tableau $likes a 'music_id' au lieu de 'id', on corrige ici :
-                        if (!isset($music['id']) && isset($music['music_id'])) {
-                            $music['id'] = $music['music_id'];
-                        }
-                        
-                        // On inclut la carte
-                        require __DIR__ . '/../components/music-card-playlist.php'; 
-                    ?>
+            <!-- Message de suggestion -->
+            <div class="mt-12 p-8 rounded-xl bg-gradient-to-br from-bg-card to-bg-surface border border-border-main">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-lightbulb text-primary text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-text-main mb-2">Enrichissez votre playlist</h3>
+                        <p class="text-text-sub mb-4">Explorez notre bibliothèque et ajoutez plus de titres pour créer votre collection parfaite !</p>
+                        <a href="/music" class="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all">
+                            Découvrir plus de musiques
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php else: ?>
+        <!-- Liste complète avec séparateurs -->
+        <div class="px-4">
+            <div class="mb-4 flex items-center justify-between text-text-sub text-sm font-semibold uppercase tracking-wide px-4">
+                <div class="flex items-center gap-6">
+                    <span class="w-8 text-center">#</span>
+                    <span>Titre</span>
+                </div>
+                <div class="flex items-center gap-12">
+                    <span><i class="far fa-clock mr-1"></i> Durée</span>
+                </div>
+            </div>
+            <div class="space-y-0.5">
+                <?php foreach ($songs as $index => $song): ?>
+                    <?php component('music-card', ['track' => $song, 'index' => $index + 1, 'showIndex' => true]); ?>
                 <?php endforeach; ?>
             </div>
-
-        <?php endif; ?>
-    </div>
+        </div>
+    <?php endif; ?>
 </div>
+
+<script>
+// Play all songs in order
+function playAll() {
+    const songElements = document.querySelectorAll('div.group[data-song-id]');
+    if (songElements.length > 0) {
+        const songIds = Array.from(songElements).map(el => parseInt(el.dataset.songId));
+        Player.playQueue(songIds, 0);
+    }
+}
+
+// Shuffle and play
+function shuffleAll() {
+    const songElements = Array.from(document.querySelectorAll('div.group[data-song-id]'));
+    if (songElements.length > 0) {
+        // Shuffle array
+        for (let i = songElements.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [songElements[i], songElements[j]] = [songElements[j], songElements[i]];
+        }
+        const songIds = songElements.map(el => parseInt(el.dataset.songId));
+        Player.playQueue(songIds, 0);
+    }
+}
+
+// Download all liked songs
+async function downloadAll() {
+    const songElements = document.querySelectorAll('[data-song-id]');
+    let count = 0;
+    for (const element of songElements) {
+        const songId = parseInt(element.dataset.songId);
+        await addToDownloadQueue(songId);
+        count++;
+    }
+    showNotification(`${count} titre${count > 1 ? 's' : ''} ajouté${count > 1 ? 's' : ''} à la file de téléchargement`);
+}
+</script>
