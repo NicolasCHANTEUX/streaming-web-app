@@ -4,21 +4,22 @@ $musicIndex = isset($index) ? $index + 1 : 1;
 $musicId = $music['id'] ?? 0;
 $musicTitle = htmlspecialchars($music['title'] ?? 'Titre inconnu');
 $musicArtist = htmlspecialchars($music['artist'] ?? 'Artiste inconnu');
+// On gère l'image par défaut si pas de cover
 $musicCover = !empty($music['cover_path']) ? '/assets/images/covers/' . $music['cover_path'] : '/assets/images/default-cover.svg';
 
-// Échappement pour JS
+// Échappement pour les fonctions JS (play, options...)
 $jsTitle = addslashes($music['title'] ?? '');
 $jsArtist = addslashes($music['artist'] ?? '');
 $jsCover = addslashes($music['cover_path'] ?? '');
 ?>
 
-<div class="group relative flex items-center gap-3 p-2 rounded-md hover:bg-white/10 transition-colors border border-transparent hover:border-white/5 music-row">
+<div class="group relative flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all mb-2 music-row">
     
     <div class="w-6 md:w-10 flex justify-center shrink-0">
         <span class="text-text-sub text-xs md:text-sm font-medium group-hover:hidden">
             <?= $musicIndex ?>
         </span>
-        <button onclick="playMusic(<?= $musicId ?>)" class="hidden group-hover:flex text-white hover:text-primary transition-colors">
+        <button onclick="playMusic(<?= $musicId ?>)" class="hidden group-hover:flex text-white hover:text-primary transition-colors transform hover:scale-110">
             <i class="fas fa-play text-xs md:text-sm"></i>
         </button>
     </div>
