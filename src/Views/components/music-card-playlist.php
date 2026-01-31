@@ -34,13 +34,14 @@ $jsArtist = addslashes(getMusicProp($music, 'artist', ''));
 $jsCover = addslashes($musicCover);
 ?>
 
-<div class="group relative flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all mb-2 music-row">
+<div class="group relative flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all mb-2 music-row cursor-pointer"
+     onclick="playMusic(<?= $musicId ?>)">
     
     <div class="w-6 md:w-10 flex justify-center shrink-0">
         <span class="text-text-sub text-xs md:text-sm font-medium group-hover:hidden">
             <?= $musicIndex ?>
         </span>
-        <button onclick="playMusic(<?= $musicId ?>)" class="hidden group-hover:flex text-white hover:text-primary transition-colors transform hover:scale-110">
+        <button onclick="event.stopPropagation(); playMusic(<?= $musicId ?>)" class="hidden group-hover:flex text-white hover:text-primary transition-colors transform hover:scale-110">
             <i class="fas fa-play text-xs md:text-sm"></i>
         </button>
     </div>
