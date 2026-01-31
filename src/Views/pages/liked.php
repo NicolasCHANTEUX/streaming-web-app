@@ -4,14 +4,17 @@
         
         <div class="relative z-10">
             <div class="flex items-end gap-6 mb-8">
-                <div class="w-28 h-28 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-2xl flex-shrink-0">
-                    <i class="fas fa-heart text-5xl text-white"></i>
+                <div class="w-20 h-20 sm:w-28 sm:h-28 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-2xl flex-shrink-0">
+                    <i class="fas fa-heart text-3xl sm:text-5xl text-white"></i>
                 </div>
                 
                 <div class="flex-1">
-                    <p class="text-sm font-semibold text-text-sub mb-2 uppercase tracking-wide">Playlist</p>
-                    <h1 class="text-5xl md:text-6xl font-black mb-4 text-text-main leading-tight">Titres Likés</h1>
-                    <p class="text-text-sub text-base">Tous les titres que j'aime • <span class="font-semibold text-text-main"><?= isset($songs) ? count($songs) : 0 ?></span> titre<?= (isset($songs) && count($songs) > 1) ? 's' : '' ?></p>
+                    <p class="text-xs sm:text-sm font-semibold text-text-sub mb-2 uppercase tracking-wide">Playlist</p>
+                    <h1 class="text-3xl sm:text-5xl md:text-6xl font-black mb-2 sm:mb-4 text-text-main leading-tight">Titres Likés</h1>
+                    <p class="text-text-sub text-sm sm:text-base">
+                        <span class="hidden sm:inline">Tous les titres que j'aime • </span>
+                        <span class="font-semibold text-text-main"><?= isset($songs) ? count($songs) : 0 ?></span> titre<?= (isset($songs) && count($songs) > 1) ? 's' : '' ?>
+                    </p>
                 </div>
             </div>
             
