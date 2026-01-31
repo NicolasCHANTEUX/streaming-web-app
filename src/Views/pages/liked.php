@@ -1,35 +1,37 @@
 <div class="pb-8">
-    <!-- Header avec gradient et bannière -->
-    <div class="relative mb-8 pb-8 pt-12 px-6 rounded-xl overflow-hidden">
+    <!-- Header avec gradient et bannière - VERSION COMPACTE -->
+    <div class="relative mb-6 pb-5 pt-6 px-5 rounded-xl overflow-hidden">
         <!-- Gradient background -->
         <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-600/10 to-transparent"></div>
         
         <!-- Content -->
         <div class="relative z-10">
-            <div class="flex items-end gap-6 mb-8">
-                <!-- Icon -->
-                <div class="w-28 h-28 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-2xl flex-shrink-0">
-                    <i class="fas fa-heart text-5xl text-white"></i>
+            <div class="flex items-center gap-4 mb-5">
+                <!-- Icon - Plus petit -->
+                <div class="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-xl flex-shrink-0">
+                    <i class="fas fa-heart text-3xl md:text-4xl text-white"></i>
                 </div>
                 
-                <!-- Info -->
-                <div class="flex-1">
-                    <p class="text-sm font-semibold text-text-sub mb-2 uppercase tracking-wide">Playlist</p>
-                    <h1 class="text-5xl md:text-6xl font-black mb-4 text-text-main leading-tight">Titres Likés</h1>
-                    <p class="text-text-sub text-base">Tous les titres que j'aime • <span class="font-semibold text-text-main"><?= count($songs) ?></span> titre<?= count($songs) > 1 ? 's' : '' ?></p>
+                <!-- Info - Plus compacte -->
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-3xl md:text-4xl font-black mb-1.5 text-text-main leading-tight">Titres Likés</h1>
+                    <p class="text-text-sub text-sm font-medium">
+                        <span class="font-bold text-text-main"><?= count($songs) ?></span> titre<?= count($songs) > 1 ? 's' : '' ?>
+                    </p>
                 </div>
             </div>
             
             <?php if (!empty($songs)): ?>
-            <!-- Actions principales -->
-            <div class="flex items-center gap-4">
-                <button onclick="playAll()" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
+            <!-- Actions principales - Hiérarchie claire -->
+            <div class="flex items-center gap-3">
+                <!-- Action primaire : grosse, visible -->
+                <button onclick="playAll()" class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
                     <i class="fas fa-play text-sm"></i>
-                    Tout lire
+                    <span>Tout lire</span>
                 </button>
-                <button onclick="shuffleAll()" class="inline-flex items-center gap-3 px-6 py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
-                    <i class="fas fa-shuffle"></i>
-                    Aléatoire
+                <!-- Action secondaire : plus discrète -->
+                <button onclick="shuffleAll()" class="inline-flex items-center justify-center w-12 h-12 rounded-full border-2 border-text-main/30 text-text-main hover:border-text-main hover:bg-bg-card transition-all" title="Lecture aléatoire">
+                    <i class="fas fa-shuffle text-base"></i>
                 </button>
             </div>
             <?php endif; ?>
@@ -82,18 +84,20 @@
             </div>
         </div>
     <?php else: ?>
-        <!-- Liste complète avec séparateurs -->
-        <div class="px-4">
-            <div class="mb-4 flex items-center justify-between text-text-sub text-sm font-semibold uppercase tracking-wide px-4">
+        <!-- Liste complète optimisée mobile -->
+        <div class="px-2 sm:px-4">
+            <!-- Header - Masqué sur mobile pour gagner de la place -->
+            <div class="mb-3 hidden md:flex items-center justify-between text-text-sub text-xs font-semibold uppercase tracking-wide px-4">
                 <div class="flex items-center gap-6">
-                    <span class="w-8 text-center">#</span>
+                    <span class="w-10 text-center">#</span>
                     <span>Titre</span>
                 </div>
-                <div class="flex items-center gap-12">
+                <div class="flex items-center gap-8">
                     <span><i class="far fa-clock mr-1"></i> Durée</span>
+                    <span class="w-24">Actions</span>
                 </div>
             </div>
-            <div class="space-y-0.5">
+            <div class="space-y-1">
                 <?php foreach ($songs as $index => $song): ?>
                     <?php component('music-card', ['track' => $song, 'index' => $index + 1, 'showIndex' => true]); ?>
                 <?php endforeach; ?>
