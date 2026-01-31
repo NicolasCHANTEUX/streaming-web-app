@@ -46,7 +46,7 @@
             </a>
         </div>
     <?php else: ?>
-        <div class="px-4">
+        <div class="px-6">
             <div class="mb-4 flex items-center justify-between text-text-sub text-sm font-semibold uppercase tracking-wide px-4">
                 <div class="flex items-center gap-6">
                     <span class="w-8 text-center">#</span>
