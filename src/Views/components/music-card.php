@@ -6,23 +6,23 @@
  * @var bool $showIndex - Whether to show track number instead of cover
  */
 ?>
-<div class="group flex items-center px-4 py-3 rounded-lg hover:bg-bg-card transition-all cursor-pointer" 
+<div class="group flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-lg hover:bg-bg-card transition-all cursor-pointer" 
      data-song-id="<?= e($track->id) ?>"
      onclick="Player.play(<?= e($track->id) ?>)">
     
     <!-- Index or Play button -->
     <?php if (isset($showIndex) && $showIndex): ?>
-        <div class="w-8 mr-4 text-center flex-shrink-0">
-            <span class="group-hover:hidden text-text-sub font-medium"><?= $index ?></span>
-            <i class="fas fa-play hidden group-hover:inline-block text-text-main text-sm"></i>
+        <div class="w-6 sm:w-8 mr-2 sm:mr-4 text-center flex-shrink-0">
+            <span class="group-hover:hidden text-text-sub font-medium text-xs sm:text-base"><?= $index ?></span>
+            <i class="fas fa-play hidden group-hover:inline-block text-text-main text-xs sm:text-sm"></i>
         </div>
     <?php endif; ?>
     
-    <!-- Cover (smaller, more music-list style) -->
+    <!-- Cover - Plus petit sur mobile -->
     <img 
         src="<?= e($track->cover_path ?? asset('images/default-cover.svg')) ?>" 
         alt="<?= e($track->title) ?>"
-        class="w-10 h-10 rounded object-cover mr-4 flex-shrink-0 shadow-md"
+        class="w-9 h-9 sm:w-10 sm:h-10 rounded object-cover mr-2 sm:mr-4 flex-shrink-0 shadow-md"
     >
     
     <!-- Title & Artist - Plus d'espace pour le titre sur mobile -->

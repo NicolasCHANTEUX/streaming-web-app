@@ -1,36 +1,47 @@
 <div class="pb-8">
-    <!-- Header avec gradient et bannière - Optimisé mobile -->
-    <div class="relative mb-4 sm:mb-8 pb-4 sm:pb-8 pt-4 sm:pt-12 px-4 sm:px-6 rounded-xl overflow-hidden">
+    <!-- Header - Ultra compact sur mobile -->
+    <div class="relative mb-3 sm:mb-8 pb-3 sm:pb-8 pt-2 sm:pt-12 px-3 sm:px-6 rounded-xl overflow-hidden">
         <!-- Gradient background -->
         <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-600/10 to-transparent"></div>
         
         <!-- Content -->
         <div class="relative z-10">
-            <div class="flex items-end gap-3 sm:gap-6 mb-4 sm:mb-8">
-                <!-- Icon - Plus petit sur mobile -->
-                <div class="w-16 h-16 sm:w-28 sm:h-28 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-2xl flex-shrink-0">
-                    <i class="fas fa-heart text-2xl sm:text-5xl text-white"></i>
+            <div class="flex items-center gap-3 sm:gap-6 mb-3 sm:mb-8">
+                <!-- Icon - Beaucoup plus petit sur mobile -->
+                <div class="w-12 h-12 sm:w-28 sm:h-28 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg flex-shrink-0">
+                    <i class="fas fa-heart text-xl sm:text-5xl text-white"></i>
                 </div>
                 
-                <!-- Info - Textes réduits sur mobile -->
+                <!-- Info - Ultra compact sur mobile -->
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs sm:text-sm font-semibold text-text-sub mb-1 sm:mb-2 uppercase tracking-wide">Playlist</p>
-                    <h1 class="text-2xl sm:text-5xl md:text-6xl font-black mb-2 sm:mb-4 text-text-main leading-tight">Titres Likés</h1>
-                    <p class="text-text-sub text-xs sm:text-base">Tous les titres que j'aime • <span class="font-semibold text-text-main"><?= count($songs) ?></span> titre<?= count($songs) > 1 ? 's' : '' ?></p>
+                    <p class="hidden sm:block text-xs sm:text-sm font-semibold text-text-sub mb-1 sm:mb-2 uppercase tracking-wide">Playlist</p>
+                    <h1 class="text-xl sm:text-5xl md:text-6xl font-black mb-0.5 sm:mb-4 text-text-main leading-tight">Titres Likés</h1>
+                    <p class="text-text-sub text-xs sm:text-base"><span class="hidden sm:inline">Tous les titres que j'aime • </span><span class="font-semibold text-text-main"><?= count($songs) ?></span> titre<?= count($songs) > 1 ? 's' : '' ?></p>
                 </div>
+                
+                <?php if (!empty($songs)): ?>
+                <!-- Actions - Icônes uniquement sur mobile, en ligne -->
+                <div class="flex items-center gap-1.5 sm:hidden flex-shrink-0">
+                    <button onclick="playAll()" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:scale-105 transition-all shadow-lg">
+                        <i class="fas fa-play text-xs ml-0.5"></i>
+                    </button>
+                    <button onclick="shuffleAll()" class="w-10 h-10 rounded-full border-2 border-text-main/20 text-text-main flex items-center justify-center hover:border-text-main/40 transition-all">
+                        <i class="fas fa-shuffle text-xs"></i>
+                    </button>
+                </div>
+                <?php endif; ?>
             </div>
             
             <?php if (!empty($songs)): ?>
-            <!-- Actions principales - Compactes sur mobile -->
-            <div class="flex items-center gap-2 sm:gap-4">
-                <button onclick="playAll()" class="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-8 py-2.5 sm:py-4 rounded-full bg-primary text-white font-bold text-sm sm:text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
-                    <i class="fas fa-play text-xs sm:text-sm"></i>
-                    <span class="hidden xs:inline">Tout lire</span>
-                    <span class="xs:hidden">Lire</span>
+            <!-- Actions desktop uniquement -->
+            <div class="hidden sm:flex items-center gap-4">
+                <button onclick="playAll()" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
+                    <i class="fas fa-play text-sm"></i>
+                    Tout lire
                 </button>
-                <button onclick="shuffleAll()" class="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2.5 sm:py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold text-sm sm:text-base hover:border-text-main/40 hover:bg-bg-card transition-all">
+                <button onclick="shuffleAll()" class="inline-flex items-center gap-3 px-6 py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
                     <i class="fas fa-shuffle"></i>
-                    <span class="hidden sm:inline">Aléatoire</span>
+                    Aléatoire
                 </button>
             </div>
             <?php endif; ?>
