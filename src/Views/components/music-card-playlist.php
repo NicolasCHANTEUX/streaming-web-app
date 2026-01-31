@@ -1,16 +1,26 @@
 <?php
-// Sécurisation des données
+// Sécurisation des données - Supporte à la fois les objets et les tableaux
 $musicIndex = isset($index) ? $index + 1 : 1;
-$musicId = $music['id'] ?? 0;
-$musicTitle = htmlspecialchars($music['title'] ?? 'Titre inconnu');
-$musicArtist = htmlspecialchars($music['artist'] ?? 'Artiste inconnu');
+
+// Fonction helper pour accéder aux propriétés objet ou tableau
+function getMusicProp($music, $prop, $default = null) {
+    if (is_object($music)) {
+        return $music->$prop ?? $default;
+    }
+    return $music[$prop] ?? $default;
+}
+
+$musicId = getMusicProp($music, 'id', 0);
+$musicTitle = htmlspecialchars(getMusicProp($music, 'title', 'Titre inconnu'));
+$musicArtist = htmlspecialchars(getMusicProp($music, 'artist', 'Artiste inconnu'));
+$coverPath = getMusicProp($music, 'cover_path', '');
 // On gère l'image par défaut si pas de cover
-$musicCover = !empty($music['cover_path']) ? '/assets/images/covers/' . $music['cover_path'] : '/assets/images/default-cover.svg';
+$musicCover = !empty($coverPath) ? '/assets/images/covers/' . $coverPath : '/assets/images/default-cover.svg';
 
 // Échappement pour les fonctions JS (play, options...)
-$jsTitle = addslashes($music['title'] ?? '');
-$jsArtist = addslashes($music['artist'] ?? '');
-$jsCover = addslashes($music['cover_path'] ?? '');
+$jsTitle = addslashes(getMusicProp($music, 'title', ''));
+$jsArtist = addslashes(getMusicProp($music, 'artist', ''));
+$jsCover = addslashes($coverPath);
 ?>
 
 <div class="group relative flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all mb-2 music-row">
