@@ -1,65 +1,72 @@
 <?php
-/**
- * Music card component for playlists (with remove button)
- * @var object $track - Song object with id, title, artist, cover_path, duration
- * @var int $index - Optional track number
- * @var bool $showIndex - Whether to show track number instead of cover
- * @var int $playlistId - The playlist ID for removal
- */
+// On s'assure d'avoir des variables par défaut pour éviter les erreurs
+$musicIndex = isset($index) ? $index + 1 : 1;
+$musicId = $music['id'] ?? 0;
+$musicTitle = htmlspecialchars($music['title'] ?? 'Titre inconnu');
+$musicArtist = htmlspecialchars($music['artist'] ?? 'Artiste inconnu');
+// Correction chemin image
+$musicCover = !empty($music['cover_path']) ? '/assets/images/covers/' . $music['cover_path'] : '/assets/images/default-cover.svg';
+
+// Échappement pour JS
+$jsTitle = addslashes($music['title'] ?? '');
+$jsArtist = addslashes($music['artist'] ?? '');
+$jsCover = addslashes($music['cover_path'] ?? '');
 ?>
-<div class="group flex items-center px-4 py-3 rounded-lg hover:bg-bg-card transition-all cursor-pointer" 
-     data-song-id="<?= e($track->id) ?>"
-     onclick="Player.play(<?= e($track->id) ?>)">
+
+<div class="group relative flex items-center gap-4 p-3 rounded-lg hover:bg-white/10 transition-all duration-200 border border-transparent hover:border-white/5 hover:shadow-lg music-row">
     
-    <!-- Index or Play button -->
-    <?php if (isset($showIndex) && $showIndex): ?>
-        <div class="w-8 mr-4 text-center flex-shrink-0">
-            <span class="group-hover:hidden text-text-sub font-medium"><?= $index ?></span>
-            <i class="fas fa-play hidden group-hover:inline-block text-text-main text-sm"></i>
+    <div class="w-8 md:w-12 flex justify-center shrink-0">
+        <span class="text-text-sub font-medium group-hover:hidden text-sm md:text-base">
+            <?= $musicIndex ?>
+        </span>
+        <button onclick="playMusic(<?= $musicId ?>)" class="hidden group-hover:flex text-white hover:text-primary transition-colors transform hover:scale-110">
+            <i class="fas fa-play text-sm md:text-base"></i>
+        </button>
+    </div>
+
+    <div class="flex items-center gap-4 flex-1 min-w-0"> <div class="relative shrink-0 w-12 h-12 md:w-14 md:h-14">
+            <img src="<?= $musicCover ?>" 
+                 alt="<?= $musicTitle ?>" 
+                 class="w-full h-full object-cover rounded-md shadow-md group-hover:shadow-lg transition-shadow" 
+                 loading="lazy">
+             <div class="absolute inset-0 bg-black/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
         </div>
-    <?php endif; ?>
-    
-    <!-- Cover (smaller, more music-list style) -->
-    <img 
-        src="<?= e($track->cover_path ?? asset('images/default-cover.svg')) ?>" 
-        alt="<?= e($track->title) ?>"
-        class="w-10 h-10 rounded object-cover mr-4 flex-shrink-0 shadow-md"
-    >
-    
-    <!-- Title & Artist -->
-    <div class="flex-1 min-w-0 mr-4">
-        <div class="text-base font-medium mb-0.5 truncate text-text-main group-hover:text-primary transition-colors <?= isset($isPlaying) && $isPlaying ? 'text-primary' : '' ?>">
-            <?= e($track->title) ?>
-        </div>
-        <div class="text-sm text-text-sub truncate">
-            <?= e($track->artist ?? 'Unknown Artist') ?>
+
+        <div class="flex flex-col min-w-0 justify-center">
+            <h4 class="text-white font-semibold text-sm md:text-base truncate pr-2 group-hover:text-primary transition-colors">
+                <?= $musicTitle ?>
+            </h4>
+            <p class="text-text-sub text-xs md:text-sm truncate md:hidden">
+                <?= $musicArtist ?>
+            </p>
         </div>
     </div>
-    
-    <!-- Duration -->
-    <?php if (isset($track->duration) && $track->duration > 0): ?>
-        <div class="text-sm text-text-sub mr-6 flex-shrink-0 hidden sm:block">
-            <?= gmdate("i:s", $track->duration) ?>
-        </div>
-    <?php endif; ?>
-    
-    <!-- Actions (compact, visible on hover) -->
-    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
-        <button class="like-btn text-text-sub hover:text-primary p-2 transition-colors rounded-full hover:bg-bg-surface" 
-                onclick="toggleLike(<?= e($track->id) ?>, this)" 
-                data-song-id="<?= e($track->id) ?>"
+
+    <div class="hidden md:flex flex-[2] items-center">
+        <a href="#" class="text-text-sub text-sm hover:text-white hover:underline truncate transition-colors">
+            <?= $musicArtist ?>
+        </a>
+    </div>
+
+    <div class="flex items-center gap-4 md:gap-6 justify-end pr-2 md:pr-4">
+        
+        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition text-text-sub hover:text-primary active:scale-90"
+                onclick="event.stopPropagation(); toggleLike(this, <?= $musicId ?>)"
                 title="Ajouter aux favoris">
-            <i class="far fa-heart text-base"></i>
+            <?php 
+                // Petite astuce : si on est sur la page Liked, le coeur est forcément plein par défaut
+                $isLiked = true; // À adapter si utilisé ailleurs
+            ?>
+            <i class="<?= $isLiked ? 'fas text-primary' : 'far' ?> fa-heart"></i>
         </button>
-        <button class="text-text-sub hover:text-red-500 p-2 transition-colors rounded-full hover:bg-bg-surface" 
-                onclick="removeSongFromPlaylist(<?= e($track->id) ?>)" 
-                title="Retirer de la playlist">
-            <i class="fas fa-trash text-base"></i>
-        </button>
-        <button class="text-text-sub hover:text-text-main p-2 transition-colors rounded-full hover:bg-bg-surface" 
-                onclick="showSongOptions(<?= e($track->id) ?>, '<?= e($track->title) ?>', '<?= e($track->artist ?? '') ?>')" 
+
+        <span class="text-xs text-text-sub hidden sm:block font-mono">3:45</span>
+
+        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition text-text-sub hover:text-white"
+                onclick="openSongOptions(event, <?= $musicId ?>, '<?= $jsTitle ?>', '<?= $jsArtist ?>', '<?= $jsCover ?>')"
                 title="Plus d'options">
-            <i class="fas fa-ellipsis-v text-base"></i>
+            <i class="fas fa-ellipsis-h"></i>
         </button>
     </div>
+
 </div>
