@@ -1,31 +1,31 @@
 <div class="pb-8">
-    <!-- Header - Compact mais avec de l'air -->
-    <div class="relative mb-4 sm:mb-8 pb-4 sm:pb-8 pt-3 sm:pt-12 px-4 sm:px-6 rounded-xl overflow-hidden">
+    <!-- Header - Avec marge top et boutons plus gros -->
+    <div class="relative mt-4 sm:mt-0 mb-5 sm:mb-8 pb-5 sm:pb-8 pt-5 sm:pt-12 px-5 sm:px-6 rounded-xl overflow-hidden">
         <!-- Gradient background -->
         <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-600/10 to-transparent"></div>
         
         <!-- Content -->
         <div class="relative z-10">
-            <div class="flex items-center gap-3 sm:gap-6 mb-3 sm:mb-8">
-                <!-- Icon - Petit mais visible -->
-                <div class="w-14 h-14 sm:w-28 sm:h-28 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg flex-shrink-0">
-                    <i class="fas fa-heart text-xl sm:text-5xl text-white"></i>
+            <div class="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-8">
+                <!-- Icon -->
+                <div class="w-16 h-16 sm:w-28 sm:h-28 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg flex-shrink-0">
+                    <i class="fas fa-heart text-2xl sm:text-5xl text-white"></i>
                 </div>
                 
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
                     <p class="hidden sm:block text-xs sm:text-sm font-semibold text-text-sub mb-1 sm:mb-2 uppercase tracking-wide">Playlist</p>
-                    <h1 class="text-xl sm:text-5xl md:text-6xl font-black mb-1 sm:mb-4 text-text-main leading-tight">Titres Likés</h1>
+                    <h1 class="text-2xl sm:text-5xl md:text-6xl font-black mb-1 sm:mb-4 text-text-main leading-tight">Titres Likés</h1>
                     <p class="text-text-sub text-xs sm:text-base"><span class="hidden sm:inline">Tous les titres que j'aime • </span><span class="font-semibold text-text-main"><?= count($songs) ?></span> titre<?= count($songs) > 1 ? 's' : '' ?></p>
                 </div>
                 
                 <?php if (!empty($songs)): ?>
-                <!-- Actions - Icônes rondes sur mobile -->
-                <div class="flex items-center gap-2 sm:hidden flex-shrink-0">
-                    <button onclick="playAll()" class="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center hover:scale-105 transition-all shadow-lg">
+                <!-- Actions - Boutons plus gros et espacés sur mobile -->
+                <div class="flex items-center gap-2.5 sm:hidden flex-shrink-0">
+                    <button onclick="playAll()" class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center hover:scale-105 transition-all shadow-lg active:scale-95">
                         <i class="fas fa-play text-sm ml-0.5"></i>
                     </button>
-                    <button onclick="shuffleAll()" class="w-11 h-11 rounded-full border-2 border-text-main/20 text-text-main flex items-center justify-center hover:border-text-main/40 transition-all">
+                    <button onclick="shuffleAll()" class="w-12 h-12 rounded-full border-2 border-text-main/30 text-text-main flex items-center justify-center hover:border-text-main/50 transition-all active:scale-95">
                         <i class="fas fa-shuffle text-sm"></i>
                     </button>
                 </div>
