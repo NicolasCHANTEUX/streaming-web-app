@@ -17,13 +17,13 @@
             
             <?php if (!empty($songs)): ?>
             <div class="flex items-center gap-4">
-                <button onclick="playAll()" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
+                <button onclick="playAll()" class="inline-flex items-center justify-center gap-3 px-4 sm:px-8 py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
                     <i class="fas fa-play text-sm"></i>
-                    Tout lire
+                    <span class="hidden sm:inline">Tout lire</span>
                 </button>
-                <button onclick="shuffleAll()" class="inline-flex items-center gap-3 px-6 py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
+                <button onclick="shuffleAll()" class="inline-flex items-center justify-center gap-3 px-4 sm:px-6 py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
                     <i class="fas fa-random"></i>
-                    Aléatoire
+                    <span class="hidden sm:inline">Aléatoire</span>
                 </button>
             </div>
             <?php endif; ?>
