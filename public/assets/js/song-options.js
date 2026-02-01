@@ -43,6 +43,16 @@ function showSongOptions(songId, title, artist) {
 }
 
 /**
+ * Open song options modal (wrapper for showSongOptions)
+ */
+function openSongOptions(event, songId, title, artist, coverPath) {
+    if (event) {
+        event.stopPropagation();
+    }
+    showSongOptions(songId, title, artist);
+}
+
+/**
  * Close song options modal
  */
 function closeSongOptions() {

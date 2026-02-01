@@ -231,12 +231,31 @@ if ('IntersectionObserver' in window) {
 
 // Like Management
 async function toggleLike(songId, buttonElement) {
+    console.log('🔍 toggleLike called with:', {
+        songId: songId,
+        songIdType: typeof songId,
+        buttonElement: buttonElement,
+        buttonElementType: typeof buttonElement
+    });
+    
+    // Vérifier si les paramètres sont inversés
+    if (typeof songId !== 'number' && typeof songId === 'object') {
+        console.error('❌ Parameters are reversed! songId is:', songId);
+        console.error('❌ buttonElement is:', buttonElement);
+        // Corriger automatiquement
+        [songId, buttonElement] = [buttonElement, songId];
+        console.log('✅ Parameters corrected:', { songId, buttonElement });
+    }
+    
     try {
+        console.log('📤 Sending request to:', `/like/${songId}/toggle`);
         const response = await fetch(`/like/${songId}/toggle`, {
             method: 'POST'
         });
         
+        console.log('📥 Response status:', response.status);
         const result = await response.json();
+        console.log('📥 Response data:', result);
         
         if (result.success) {
             const icon = buttonElement.querySelector('i');

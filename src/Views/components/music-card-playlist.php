@@ -69,7 +69,7 @@ $jsCover = addslashes($musicCover);
     <div class="flex items-center gap-1 md:gap-4 shrink-0">
         
         <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition active:scale-90"
-                onclick="event.stopPropagation(); toggleLike(this, <?= $musicId ?>)">
+                onclick="event.stopPropagation(); toggleLike(<?= $musicId ?>, this)">
             <i class="fas fa-heart text-primary text-sm md:text-base"></i>
         </button>
 
