@@ -10,20 +10,21 @@
                 
                 <div class="flex-1">
                     <p class="text-sm font-semibold text-text-sub mb-2 uppercase tracking-wide">Playlist</p>
-                    <h1 class="text-5xl md:text-6xl font-black mb-4 text-text-main leading-tight">Titres Likés</h1>
+                    <h1 class="text-3xl md:text-5xl lg:text-6xl font-black mb-4 text-text-main leading-tight">Titres Likés</h1>
                     <p class="text-text-sub text-base">Tous les titres que j'aime • <span class="font-semibold text-text-main"><?= isset($songs) ? count($songs) : 0 ?></span> titre<?= (isset($songs) && count($songs) > 1) ? 's' : '' ?></p>
                 </div>
             </div>
             
             <?php if (!empty($songs)): ?>
             <div class="flex items-center gap-4">
-                <button onclick="playAll()" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
-                    <i class="fas fa-play text-sm"></i>
-                    Tout lire
+                <button onclick="playAll()" class="inline-flex items-center justify-center gap-3 w-14 h-14 md:w-auto md:h-auto md:px-8 md:py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
+                    <i class="fas fa-play text-lg md:text-sm"></i>
+                    <span class="hidden md:inline">Tout lire</span>
                 </button>
-                <button onclick="shuffleAll()" class="inline-flex items-center gap-3 px-6 py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
-                    <i class="fas fa-random"></i>
-                    Aléatoire
+                
+                <button onclick="shuffleAll()" class="inline-flex items-center justify-center gap-3 w-14 h-14 md:w-auto md:h-auto md:px-6 md:py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
+                    <i class="fas fa-random text-lg md:text-base"></i>
+                    <span class="hidden md:inline">Aléatoire</span>
                 </button>
             </div>
             <?php endif; ?>
@@ -57,7 +58,6 @@
             <div class="flex flex-col"> 
                 <?php foreach ($songs as $index => $song): ?>
                     <?php 
-                        // On prépare la variable $music pour le composant
                         $music = $song;
                         require __DIR__ . '/../components/music-card-playlist.php'; 
                     ?>
