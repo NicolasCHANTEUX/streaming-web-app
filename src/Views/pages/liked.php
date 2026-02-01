@@ -70,12 +70,9 @@
 <script>
 // Play all songs in order
 function playAll() {
-    const songButtons = document.querySelectorAll('button[onclick^="playMusic"]');
-    if (songButtons.length > 0) {
-        const songIds = Array.from(songButtons).map(btn => {
-            const match = btn.getAttribute('onclick').match(/playMusic\((\d+)\)/);
-            return match ? parseInt(match[1]) : null;
-        }).filter(id => id !== null);
+    const songElements = document.querySelectorAll('.music-row[data-song-id]');
+    if (songElements.length > 0) {
+        const songIds = Array.from(songElements).map(el => parseInt(el.dataset.songId));
         
         if(typeof playQueue === 'function') {
             playQueue(songIds, 0);
@@ -85,12 +82,9 @@ function playAll() {
 
 // Shuffle and play
 function shuffleAll() {
-    const songButtons = document.querySelectorAll('button[onclick^="playMusic"]');
-    if (songButtons.length > 0) {
-        const songIds = Array.from(songButtons).map(btn => {
-            const match = btn.getAttribute('onclick').match(/playMusic\((\d+)\)/);
-            return match ? parseInt(match[1]) : null;
-        }).filter(id => id !== null);
+    const songElements = document.querySelectorAll('.music-row[data-song-id]');
+    if (songElements.length > 0) {
+        const songIds = Array.from(songElements).map(el => parseInt(el.dataset.songId));
 
         // Shuffle
         for (let i = songIds.length - 1; i > 0; i--) {
