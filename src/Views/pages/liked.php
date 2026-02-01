@@ -4,29 +4,26 @@
         
         <div class="relative z-10">
             <div class="flex items-end gap-6 mb-8">
-                <div class="w-20 h-20 sm:w-28 sm:h-28 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-2xl flex-shrink-0">
-                    <i class="fas fa-heart text-3xl sm:text-5xl text-white"></i>
+                <div class="w-28 h-28 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-2xl flex-shrink-0">
+                    <i class="fas fa-heart text-5xl text-white"></i>
                 </div>
                 
                 <div class="flex-1">
-                    <p class="text-xs sm:text-sm font-semibold text-text-sub mb-2 uppercase tracking-wide">Playlist</p>
-                    <h1 class="text-3xl sm:text-5xl md:text-6xl font-black mb-2 sm:mb-4 text-text-main leading-tight">Titres Likés</h1>
-                    <p class="text-text-sub text-sm sm:text-base">
-                        <span class="hidden sm:inline">Tous les titres que j'aime • </span>
-                        <span class="font-semibold text-text-main"><?= isset($songs) ? count($songs) : 0 ?></span> titre<?= (isset($songs) && count($songs) > 1) ? 's' : '' ?>
-                    </p>
+                    <p class="text-sm font-semibold text-text-sub mb-2 uppercase tracking-wide">Playlist</p>
+                    <h1 class="text-5xl md:text-6xl font-black mb-4 text-text-main leading-tight">Titres Likés</h1>
+                    <p class="text-text-sub text-base">Tous les titres que j'aime • <span class="font-semibold text-text-main"><?= isset($songs) ? count($songs) : 0 ?></span> titre<?= (isset($songs) && count($songs) > 1) ? 's' : '' ?></p>
                 </div>
             </div>
             
             <?php if (!empty($songs)): ?>
             <div class="flex items-center gap-4">
-                <button onclick="playAll()" class="inline-flex items-center justify-center gap-3 px-4 sm:px-8 py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
+                <button onclick="playAll()" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
                     <i class="fas fa-play text-sm"></i>
-                    <span class="hidden sm:inline">Tout lire</span>
+                    Tout lire
                 </button>
-                <button onclick="shuffleAll()" class="inline-flex items-center justify-center gap-3 px-4 sm:px-6 py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
+                <button onclick="shuffleAll()" class="inline-flex items-center gap-3 px-6 py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
                     <i class="fas fa-random"></i>
-                    <span class="hidden sm:inline">Aléatoire</span>
+                    Aléatoire
                 </button>
             </div>
             <?php endif; ?>
@@ -46,8 +43,8 @@
             </a>
         </div>
     <?php else: ?>
-        <div class="px-6">
-            <div class="mb-4 flex items-center justify-between text-text-sub text-sm font-semibold uppercase tracking-wide px-4">
+        <div class="">
+            <div class="mb-4 flex items-center justify-between text-text-sub text-sm font-semibold uppercase tracking-wide px-2 md:px-4">
                 <div class="flex items-center gap-6">
                     <span class="w-8 text-center">#</span>
                     <span>Titre</span>
@@ -73,9 +70,6 @@
 <script>
 // Play all songs in order
 function playAll() {
-    // Note: Adapté pour récupérer les IDs depuis les boutons playMusic si besoin, 
-    // ou idéalement injecter le JSON des IDs via PHP comme vu précédemment.
-    // Pour l'instant je garde ta structure JS existante si elle fonctionne.
     const songButtons = document.querySelectorAll('button[onclick^="playMusic"]');
     if (songButtons.length > 0) {
         const songIds = Array.from(songButtons).map(btn => {
