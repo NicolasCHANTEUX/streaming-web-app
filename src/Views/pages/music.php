@@ -11,8 +11,8 @@
                 
                 <div class="flex-1">
                     <p class="text-sm font-semibold text-text-sub mb-2 uppercase tracking-wide">Bibliothèque</p>
-                    <h1 class="text-5xl md:text-6xl font-black mb-4 text-text-main leading-tight">Toutes les musiques</h1>
-                    <p class="text-text-sub text-base">Votre collection complète • <span id="total-count" class="font-semibold text-text-main">--</span> titre<span id="plural">s</span></p>
+                    <h1 class="text-3xl md:text-5xl lg:text-6xl font-black mb-4 text-text-main leading-tight">Toutes les musiques</h1>
+                    <p class="text-text-sub text-base"><span id="total-count" class="font-semibold text-text-main">--</span> titre<span id="plural">s</span></p>
                 </div>
             </div>
             
