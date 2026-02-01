@@ -1,5 +1,4 @@
 <div class="pb-8">
-    <!-- Header stylisé comme Liked -->
     <div class="relative mb-8 pb-8 pt-12 px-6 rounded-xl overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-cyan-600/10 to-transparent"></div>
         
@@ -17,14 +16,16 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <button onclick="playAll()" id="play-all-btn" class="hidden inline-flex items-center justify-center gap-3 px-4 sm:px-8 py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
-                    <i class="fas fa-play text-sm"></i>
-                    <span class="hidden sm:inline">Tout lire</span>
+                <button onclick="playAll()" id="play-all-btn" class="hidden inline-flex items-center justify-center gap-3 w-14 h-14 md:w-auto md:h-auto md:px-8 md:py-4 rounded-full bg-primary text-white font-bold text-base hover:scale-105 hover:bg-primary-hover transition-all shadow-lg">
+                    <i class="fas fa-play text-lg md:text-sm"></i>
+                    <span class="hidden md:inline">Tout lire</span>
                 </button>
-                <button onclick="shuffleAll()" id="shuffle-btn" class="hidden inline-flex items-center justify-center gap-3 px-4 sm:px-6 py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
-                    <i class="fas fa-random"></i>
-                    <span class="hidden sm:inline">Aléatoire</span>
+                
+                <button onclick="shuffleAll()" id="shuffle-btn" class="hidden inline-flex items-center justify-center gap-3 w-14 h-14 md:w-auto md:h-auto md:px-6 md:py-4 rounded-full border-2 border-text-main/20 text-text-main font-semibold hover:border-text-main/40 hover:bg-bg-card transition-all">
+                    <i class="fas fa-random text-lg md:text-base"></i>
+                    <span class="hidden md:inline">Aléatoire</span>
                 </button>
+
                 <button onclick="cleanAllTitles()" class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 sm:py-2.5 rounded-full bg-transparent text-text-main border border-border-main font-semibold hover:border-text-main transition-colors">
                     <i class="fas fa-broom"></i>
                     <span class="hidden sm:inline">Clean Titles</span>
@@ -37,7 +38,6 @@
         </div>
     </div>
 
-    <!-- Message si aucune musique -->
     <div id="empty-state" class="text-center py-20 px-6 hidden">
         <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-500/10 to-cyan-600/10 flex items-center justify-center">
             <i class="fas fa-folder-open text-6xl text-text-sub"></i>
@@ -50,9 +50,8 @@
         </a>
     </div>
 
-    <!-- Liste des musiques (style Liked) -->
-    <div id="music-list-container" class="px-4 hidden">
-        <div class="mb-4 flex items-center justify-between text-text-sub text-sm font-semibold uppercase tracking-wide px-4">
+    <div id="music-list-container" class="hidden">
+        <div class="mb-4 flex items-center justify-between text-text-sub text-sm font-semibold uppercase tracking-wide px-2 md:px-4">
             <div class="flex items-center gap-6">
                 <span class="w-8 text-center">#</span>
                 <span>Titre</span>
@@ -62,13 +61,10 @@
             </div>
         </div>
 
-        <!-- Container pour les musiques chargées dynamiquement -->
         <div id="music-grid" class="flex flex-col">
-            <!-- Les musiques seront chargées ici par JavaScript -->
-        </div>
+            </div>
     </div>
 
-    <!-- Sentinel pour détecter le scroll + Spinner -->
     <div id="scroll-sentinel" class="h-10 w-full mt-4 flex justify-center items-center">
         <div id="loading-spinner" class="hidden animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
     </div>
@@ -101,12 +97,13 @@
     let totalLoaded = 0;
     let allSongIds = [];
 
-    // Fonction pour créer une carte de musique (format liste comme Liked)
+    // Fonction pour créer une carte de musique (format liste comme Liked avec bordures)
     function createMusicCard(track, index) {
         const safeTitle = (track.title || 'Unknown Title').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeArtist = (track.artist || 'Unknown Artist').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeCover = (track.cover_path || '/assets/images/default-cover.svg').replace(/'/g, "\\'");
 
+        // Note : Les classes ici (p-2, rounded-lg, border-white/10, mb-2) assurent le style "cadre" demandé
         return `
             <div class="group relative flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all mb-2 music-row" data-song-id="${track.id}">
                 
